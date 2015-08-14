@@ -5,8 +5,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.github.florent37.picassopalette.PicassoPalette;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -48,10 +50,10 @@ public class ImageAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         JSONObject movie = (JSONObject) getItem(position);
-        String PosterUrl = null;
+        String posterUrl = null;
         String nameJson = null;
         try {
-            PosterUrl = BASE_URL.concat(movie.getString("backdrop_path"));
+            posterUrl = BASE_URL.concat(movie.getString("backdrop_path"));
             nameJson = movie.getString("title");
         } catch (JSONException e) {
             e.printStackTrace();
@@ -67,9 +69,15 @@ public class ImageAdapter extends BaseAdapter {
         }
         SquaredImageView poster = (SquaredImageView) movieView.findViewById(R.id.movie_poster);
         TextView name = (TextView) movieView.findViewById(R.id.movie_name);
+        LinearLayout girdLayout = (LinearLayout) movieView.findViewById(R.id.gird_layout);
 
         name.setText(nameJson);
-        Picasso.with(mContext).load(PosterUrl).into(poster);
+        //Picasso.with(mContext).load(posterUrl).into(poster);
+        Picasso.with(mContext).load(posterUrl).into(poster
+                , PicassoPalette.with(posterUrl, poster)
+                .use(PicassoPalette.Profile.MUTED_LIGHT)
+                .intoBackground(girdLayout)
+                .intoTextColor(name, PicassoPalette.Swatch.TITLE_TEXT_COLOR));
         return movieView;
     }
 
