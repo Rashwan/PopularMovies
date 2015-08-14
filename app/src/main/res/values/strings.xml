@@ -3,4 +3,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_movie_detalis">MovieDetalisActivity</string>
+    <string name="sort_top_rated">Sort by : Top Rated</string>
+    <string name="sort_popular">Sort By : Popular</string>
 </resources>

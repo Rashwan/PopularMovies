@@ -53,32 +53,42 @@ public class MovieDetailsActivityFragment extends Fragment {
             try {
                 if (movieDetails != null) {
                     String posterUrl = BASE_URL.concat(movieDetails.getString("backdrop_path"));
-                    PicassoPalette picassoPalette = null;
 
                     Picasso.with(getActivity()).load(posterUrl).into(posterView
-                            , PicassoPalette.with(posterUrl, posterView)
+                        , PicassoPalette.with(posterUrl, posterView)
                             .intoCallBack(new PicassoPalette.CallBack() {
-                                              @Override
-                                              public void onPaletteLoaded(Palette palette) {
-                                                  Palette.Swatch actionBarColor = palette.getVibrantSwatch();
-                                                  int actionBarColorRGB = actionBarColor.getRgb();
-                                                  ColorDrawable actionBarColorDrawable = new ColorDrawable(actionBarColorRGB);
-                                                  Palette.Swatch statusBarColor = palette.getDarkVibrantSwatch();
-                                                  int statusBarColorRGB = statusBarColor.getRgb();
+                                  @Override
+                                  public void onPaletteLoaded(Palette palette) {
 
-                                                  AppCompatActivity actionBarActivity = (AppCompatActivity) getActivity();
-                                                  android.support.v7.app.ActionBar actionBar = actionBarActivity.getSupportActionBar();
-                                                  actionBar.setBackgroundDrawable(actionBarColorDrawable);
+                                      //Adding Color to actionBar
+                                      Palette.Swatch actionBarColor = palette.getVibrantSwatch();
+                                      if (actionBarColor!= null) {
+                                          int actionBarColorRGB = actionBarColor.getRgb();
 
-                                                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                                      Window window = getActivity().getWindow();
-                                                      window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                                                      window.setStatusBarColor(statusBarColorRGB);
-                                                  }
-                                              }
+                                          AppCompatActivity actionBarActivity = (AppCompatActivity) getActivity();
+                                          android.support.v7.app.ActionBar actionBar = actionBarActivity.getSupportActionBar();
+                                          if (actionBar != null) {
+                                              actionBar.setBackgroundDrawable(new ColorDrawable(actionBarColorRGB));
                                           }
+                                      }
 
-                            ));
+                                      //Adding color to StatusBar
+
+                                      Palette.Swatch statusBarColor = palette.getDarkVibrantSwatch();
+
+                                      if (statusBarColor != null) {
+                                          int statusBarColorRGB = statusBarColor.getRgb();
+
+                                          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                              Window window = getActivity().getWindow();
+                                              window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                                              window.setStatusBarColor(statusBarColorRGB);
+                                          }
+                                      }
+                                  }
+                              }
+
+                                ));
 
 
                     titleView.setText(movieDetails.getString("original_title"));
