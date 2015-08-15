@@ -3,6 +3,7 @@ package com.example.rashwan.popularmovies;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -32,9 +33,8 @@ import java.net.URL;
  * A placeholder fragment containing a simple view.
  */
 public class MainActivityFragment extends Fragment {
-    public static final String POPULAR_MOVIES = "http://api.themoviedb.org/3/movie/popular?api_key=9c3654aee5aea28f21963eeebfd6f4a0";
-    public static final String TOP_RATED_MOVIES = "http://api.themoviedb.org/3/movie/top_rated?page=1&api_key=9c3654aee5aea28f21963eeebfd6f4a0";
-
+    private String popularMoviesURL;
+    private String topRatedMoviesURL;
     private ImageAdapter adapter;
     public GridView gridView;
     SharedPreferences menu_sp ;
@@ -49,9 +49,22 @@ public class MainActivityFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         menu_sp = getActivity().getPreferences(Context.MODE_PRIVATE);
-        sort_pref = menu_sp.getString("sort_mode",(getString(R.string.sort_popular)));
-
+        sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), (getString(R.string.sort_popular)));
         editor = menu_sp.edit();
+
+        //Build popular movies query URL
+        Uri popularURI = Uri.parse(getString(R.string.movies_base_url)).buildUpon()
+                .appendPath(getString(R.string.popular_path))
+                .appendQueryParameter(getString(R.string.api_key_query_param),getString(R.string.movie_db_api_key))
+                .build();
+        popularMoviesURL = popularURI.toString();
+
+        //Build top rated movies query URL
+        Uri topRatedURI = Uri.parse(getString(R.string.movies_base_url)).buildUpon()
+                .appendPath(getString(R.string.top_rated_path))
+                .appendQueryParameter(getString(R.string.api_key_query_param), getString(R.string.movie_db_api_key))
+                .build();
+        topRatedMoviesURL = topRatedURI.toString();
     }
 
     @Override
@@ -76,13 +89,13 @@ public class MainActivityFragment extends Fragment {
 
             case R.id.action_sort :
                 if (item.getTitle().equals(getString(R.string.sort_popular))){
-                    new FetchMovies().execute(POPULAR_MOVIES);
-                    editor.putString("sort_mode", getString(R.string.sort_popular));
+                    new FetchMovies().execute(popularMoviesURL);
+                    editor.putString(getString(R.string.sort_mode_key), getString(R.string.sort_popular));
                     item.setTitle(R.string.sort_top_rated);
 
                 }else{
-                    new FetchMovies().execute(TOP_RATED_MOVIES);
-                    editor.putString("sort_mode", getString(R.string.sort_top_rated));
+                    new FetchMovies().execute(topRatedMoviesURL);
+                    editor.putString(getString(R.string.sort_mode_key), getString(R.string.sort_top_rated));
                     item.setTitle(R.string.sort_popular);
                 }
 
@@ -106,7 +119,7 @@ public class MainActivityFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent detailsIntent = new Intent(getActivity(),MovieDetalisActivity.class);
 
-                detailsIntent.putExtra("movieDetails",adapter.getItem(position).toString());
+                detailsIntent.putExtra(getString(R.string.movie_details_extra_key),adapter.getItem(position).toString());
 
                 startActivity(detailsIntent);
             }
@@ -118,13 +131,10 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        Log.e("Start",sort_pref);
         if (sort_pref.equals(getString(R.string.sort_popular))){
-            Log.e("Start","popular");
-            new FetchMovies().execute(POPULAR_MOVIES);
+            new FetchMovies().execute(popularMoviesURL);
         }else{
-            new FetchMovies().execute(TOP_RATED_MOVIES);
-            Log.e("Start", "RAted");
+            new FetchMovies().execute(topRatedMoviesURL);
         }
 
     }
@@ -146,7 +156,6 @@ public class MainActivityFragment extends Fragment {
         protected JSONArray doInBackground(String... params) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
-            Log.e(LOG_TAG,"DO in BG");
             URL url = null;
             try {
                 url = new URL(params[0]);

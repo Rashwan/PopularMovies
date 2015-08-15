@@ -5,4 +5,12 @@
     <string name="title_activity_movie_detalis">MovieDetalisActivity</string>
     <string name="sort_top_rated">Sort by : Top Rated</string>
     <string name="sort_popular">Sort By : Popular</string>
+    <string name="sort_mode_key">sort_mode</string>
+    <string name="movies_base_url">http://api.themoviedb.org/3/movie/</string>
+    <string name="popular_path">popular</string>
+    <string name="api_key_query_param">api_key</string>
+    <string name="top_rated_path">top_rated</string>
+    <string name="movie_details_extra_key">movieDetails</string>
+    <string name="poster_base_url">http://image.tmdb.org/t/p/w500</string>
+    <string name="movie_db_api_key">put your api key here </string>
 </resources>

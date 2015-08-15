@@ -2,6 +2,7 @@ package com.example.rashwan.popularmovies;
 
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -26,7 +27,6 @@ import org.json.JSONObject;
  */
 public class MovieDetailsActivityFragment extends Fragment {
 
-    public static final String BASE_URL = "http://image.tmdb.org/t/p/w500/";
 
     public MovieDetailsActivityFragment() {
     }
@@ -36,7 +36,9 @@ public class MovieDetailsActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movie_detalis, container, false);
         Intent intent = getActivity().getIntent();
-        if (intent.hasExtra("movieDetails")){
+
+        //get movie object and parse it
+        if (intent.hasExtra(getString(R.string.movie_details_extra_key))){
             JSONObject movieDetails = null;
             String movieExtras = intent.getExtras().getString("movieDetails");
             try {
@@ -52,10 +54,13 @@ public class MovieDetailsActivityFragment extends Fragment {
 
             try {
                 if (movieDetails != null) {
-                    String posterUrl = BASE_URL.concat(movieDetails.getString("backdrop_path"));
+                    Uri posterURI = Uri.parse(getString(R.string.poster_base_url)).buildUpon()
+                            .appendEncodedPath(movieDetails.getString("backdrop_path"))
+                            .build();
 
-                    Picasso.with(getActivity()).load(posterUrl).into(posterView
-                        , PicassoPalette.with(posterUrl, posterView)
+                    //Load poster image using Picasso & change the actionBar and statusBar accordingly
+                    Picasso.with(getActivity()).load(posterURI).into(posterView
+                        , PicassoPalette.with(posterURI.toString(), posterView)
                             .intoCallBack(new PicassoPalette.CallBack() {
                                   @Override
                                   public void onPaletteLoaded(Palette palette) {
@@ -73,7 +78,6 @@ public class MovieDetailsActivityFragment extends Fragment {
                                       }
 
                                       //Adding color to StatusBar
-
                                       Palette.Swatch statusBarColor = palette.getDarkVibrantSwatch();
 
                                       if (statusBarColor != null) {
