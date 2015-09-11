@@ -22,6 +22,8 @@ public class ImageAdapter extends BaseAdapter {
     private Context mContext;
     private JSONArray mMovies;
     public static final String BASE_URL = "http://image.tmdb.org/t/p/w185/";
+    int page = 1;
+
     public ImageAdapter(Context context,JSONArray movies) {
         this.mContext = context;
         this.mMovies = movies;
@@ -79,6 +81,18 @@ public class ImageAdapter extends BaseAdapter {
                 .intoBackground(girdLayout)
                 .intoTextColor(name, PicassoPalette.Swatch.TITLE_TEXT_COLOR));
         return movieView;
+    }
+
+    public void add(JSONArray result){
+        for (int i = 0; i < result.length(); i++) {
+
+            try {
+                mMovies.put(result.get(i));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 
 }

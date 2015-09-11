@@ -89,12 +89,14 @@ public class MainActivityFragment extends Fragment {
 
             case R.id.action_sort :
                 if (item.getTitle().equals(getString(R.string.sort_popular))){
-                    new FetchMovies().execute(popularMoviesURL);
+                    adapter = new ImageAdapter(getActivity(),new JSONArray());
+                    new FetchMovies().execute(popularMoviesURL,"1");
                     editor.putString(getString(R.string.sort_mode_key), getString(R.string.sort_popular));
                     item.setTitle(R.string.sort_top_rated);
 
                 }else{
-                    new FetchMovies().execute(topRatedMoviesURL);
+                    adapter = new ImageAdapter(getActivity(),new JSONArray());
+                    new FetchMovies().execute(topRatedMoviesURL,"1");
                     editor.putString(getString(R.string.sort_mode_key), getString(R.string.sort_top_rated));
                     item.setTitle(R.string.sort_popular);
                 }
@@ -124,6 +126,16 @@ public class MainActivityFragment extends Fragment {
                 startActivity(detailsIntent);
             }
         });
+        gridView.setOnScrollListener(new EndlessScrollListener() {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                if (sort_pref.equals(getString(R.string.sort_popular))){
+                    new FetchMovies().execute(popularMoviesURL,Integer.valueOf(page+1).toString());
+                }else{
+                    new FetchMovies().execute(topRatedMoviesURL,Integer.valueOf(page+1).toString());
+                }
+            }
+        });
 
         return rootView;
     }
@@ -132,9 +144,9 @@ public class MainActivityFragment extends Fragment {
     public void onStart() {
         super.onStart();
         if (sort_pref.equals(getString(R.string.sort_popular))){
-            new FetchMovies().execute(popularMoviesURL);
+            new FetchMovies().execute(popularMoviesURL,"1");
         }else{
-            new FetchMovies().execute(topRatedMoviesURL);
+            new FetchMovies().execute(topRatedMoviesURL,"1");
         }
 
     }
@@ -156,11 +168,12 @@ public class MainActivityFragment extends Fragment {
         protected JSONArray doInBackground(String... params) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
+            Uri uri = Uri.parse(params[0]).buildUpon().appendQueryParameter("page",params[1]).build();
             URL url = null;
             try {
-                url = new URL(params[0]);
-            } catch (MalformedURLException e1) {
-                e1.printStackTrace();
+                url = new URL(uri.toString());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
             }
 
 
@@ -219,8 +232,15 @@ public class MainActivityFragment extends Fragment {
         @Override
         protected void onPostExecute(JSONArray result) {
             if (result != null) {
-                adapter = new ImageAdapter(getActivity(),result);
-                gridView.setAdapter(adapter);
+                Log.e(LOG_TAG, String.valueOf(adapter.getCount()));
+                if (adapter.isEmpty()){
+                    adapter.add(result);
+                    gridView.setAdapter(adapter);
+                }else {
+                    adapter.add(result);
+                    adapter.notifyDataSetChanged();
+                }
+
 
             }
 
