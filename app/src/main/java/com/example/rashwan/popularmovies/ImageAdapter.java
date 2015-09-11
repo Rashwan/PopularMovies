@@ -53,7 +53,7 @@ public class ImageAdapter extends BaseAdapter {
         String posterUrl = null;
         String nameJson = null;
         try {
-            posterUrl = BASE_URL.concat(movie.getString("backdrop_path"));
+            posterUrl = BASE_URL.concat(movie.getString("poster_path"));
             nameJson = movie.getString("title");
         } catch (JSONException e) {
             e.printStackTrace();
@@ -73,7 +73,7 @@ public class ImageAdapter extends BaseAdapter {
 
         name.setText(nameJson);
         //Picasso.with(mContext).load(posterUrl).into(poster);
-        Picasso.with(mContext).load(posterUrl).into(poster
+        Picasso.with(mContext).load(posterUrl).fit().centerCrop().into(poster
                 , PicassoPalette.with(posterUrl, poster)
                 .use(PicassoPalette.Profile.MUTED_LIGHT)
                 .intoBackground(girdLayout)
