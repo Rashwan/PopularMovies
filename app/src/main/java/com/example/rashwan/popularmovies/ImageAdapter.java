@@ -1,6 +1,7 @@
 package com.example.rashwan.popularmovies;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,37 +12,30 @@ import android.widget.TextView;
 import com.github.florent37.picassopalette.PicassoPalette;
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by rashwan on 8/11/15.
  */
 public class ImageAdapter extends BaseAdapter {
     private Context mContext;
-    private JSONArray mMovies;
+    private List<Movie> mMovies = new ArrayList<>();
     public static final String BASE_URL = "http://image.tmdb.org/t/p/w185/";
-    int page = 1;
 
-    public ImageAdapter(Context context,JSONArray movies) {
+    public ImageAdapter(Context context,List<Movie> movies) {
         this.mContext = context;
         this.mMovies = movies;
     }
 
     @Override
     public int getCount() {
-        return mMovies.length();
+        return mMovies.size();
     }
 
     @Override
     public Object getItem(int position) {
-        try {
             return mMovies.get(position);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     @Override
@@ -51,16 +45,9 @@ public class ImageAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        JSONObject movie = (JSONObject) getItem(position);
-        String posterUrl = null;
-        String nameJson = null;
-        try {
-            posterUrl = BASE_URL.concat(movie.getString("poster_path"));
-            nameJson = movie.getString("title");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
+        Movie movie = (Movie) getItem(position);
+        Uri posterUri = movie.getHomeUri();
+        String nameString = movie.getTitle();
 
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -73,25 +60,19 @@ public class ImageAdapter extends BaseAdapter {
         TextView name = (TextView) movieView.findViewById(R.id.movie_name);
         LinearLayout girdLayout = (LinearLayout) movieView.findViewById(R.id.gird_layout);
 
-        name.setText(nameJson);
+        name.setText(nameString);
         //Picasso.with(mContext).load(posterUrl).into(poster);
-        Picasso.with(mContext).load(posterUrl).fit().centerCrop().into(poster
-                , PicassoPalette.with(posterUrl, poster)
+        Picasso.with(mContext).load(posterUri).fit().centerCrop().into(poster
+                , PicassoPalette.with(posterUri.toString(), poster)
                 .use(PicassoPalette.Profile.MUTED_LIGHT)
                 .intoBackground(girdLayout)
                 .intoTextColor(name, PicassoPalette.Swatch.TITLE_TEXT_COLOR));
         return movieView;
     }
 
-    public void add(JSONArray result){
-        for (int i = 0; i < result.length(); i++) {
-
-            try {
-                mMovies.put(result.get(i));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
+    public void add(List<Movie> result){
+        for (int i = 0; i < result.size(); i++) {
+            mMovies.add(result.get(i));
         }
     }
 

@@ -26,9 +26,6 @@ import com.github.florent37.picassopalette.BitmapPalette;
 import com.github.florent37.picassopalette.PicassoPalette;
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 
 /**
  * A placeholder fragment containing a simple view.
@@ -45,63 +42,40 @@ public class MovieDetailsActivityFragment extends Fragment {
         final View rootView = inflater.inflate(R.layout.fragment_movie_detalis, container, false);
         Intent intent = getActivity().getIntent();
 
-
-
         //get movie object and parse it
         if (intent.hasExtra(getString(R.string.movie_details_extra_key))){
-            JSONObject movieDetails = null;
-            String movieExtras = intent.getExtras().getString("movieDetails");
-            try {
-                movieDetails = new JSONObject(movieExtras);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            Movie movie = intent.getParcelableExtra(getString(R.string.movie_details_extra_key));
+
             TextView titleView = (TextView) rootView.findViewById(R.id.title);
             final ImageView poster = (ImageView) rootView.findViewById(R.id.image);
             TextView releaseDateView = (TextView) rootView.findViewById(R.id.release_date);
             TextView plotView = (TextView) rootView.findViewById(R.id.plot);
             TextView userRatingView = (TextView) rootView.findViewById(R.id.user_rating);
 
+            if (movie != null) {
+                Uri blurPosterUri = movie.getBlurPosterUri();
 
-
-
-            try {
-                if (movieDetails != null) {
-                     Uri posterURI = null;
-                    try {
-                        posterURI = Uri.parse(getString(R.string.poster_base_url)).buildUpon()
-                                .appendEncodedPath(movieDetails.getString("backdrop_path"))
-                                .build();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                    Picasso.with(getActivity()).load(posterURI).fit().centerCrop().into(poster,PicassoPalette.with(posterURI.toString(),poster)
+                Picasso.with(getActivity()).load(blurPosterUri).
+                    fit().centerCrop().into(poster,
+                    PicassoPalette.with(blurPosterUri.toString(), poster)
                     .intoCallBack(new BitmapPalette.CallBack() {
                         @Override
                         public void onPaletteLoaded(Palette palette) {
                             //Add Blur
-                            Bitmap bitmap = ((BitmapDrawable)poster.getDrawable()).getBitmap();
-                            poster.setImageBitmap(blurRenderScript(bitmap,18));
+                            Bitmap bitmap = ((BitmapDrawable) poster.getDrawable()).getBitmap();
+                            poster.setImageBitmap(blurRenderScript(bitmap, 18));
 
                             //Apply Palette  Effect
                             applyPalette(palette);
                         }
                     }));
 
-                    //Setting up Movie Details
-                    titleView.setText(movieDetails.getString("original_title"));
-                    String date = movieDetails.getString("release_date");
-                    releaseDateView.setText(date);
-                    plotView.setText(movieDetails.getString("overview"));
-                    userRatingView.setText(movieDetails.getString("vote_average"));
-
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
+                //Setting up Movie Details
+                titleView.setText(movie.getTitle());
+                releaseDateView.setText(movie.getReleaseDate());
+                plotView.setText(movie.getPlot());
+                userRatingView.setText(movie.getVoteAverage());
             }
-
-
         }
         return rootView;
     }

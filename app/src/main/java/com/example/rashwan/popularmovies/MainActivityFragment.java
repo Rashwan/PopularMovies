@@ -28,6 +28,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -37,9 +39,10 @@ public class MainActivityFragment extends Fragment {
     private String topRatedMoviesURL;
     private ImageAdapter adapter;
     public GridView gridView;
-    SharedPreferences menu_sp ;
-    SharedPreferences.Editor editor;
-    String sort_pref;
+    private SharedPreferences menu_sp ;
+    private SharedPreferences.Editor editor;
+    private String sort_pref;
+    private String jsonResponse;
 
     public MainActivityFragment() {
     }
@@ -89,13 +92,13 @@ public class MainActivityFragment extends Fragment {
 
             case R.id.action_sort :
                 if (item.getTitle().equals(getString(R.string.sort_popular))){
-                    adapter = new ImageAdapter(getActivity(),new JSONArray());
+                    adapter = new ImageAdapter(getActivity(),new ArrayList<Movie>());
                     new FetchMovies().execute(popularMoviesURL,"1");
                     editor.putString(getString(R.string.sort_mode_key), getString(R.string.sort_popular));
                     item.setTitle(R.string.sort_top_rated);
 
                 }else{
-                    adapter = new ImageAdapter(getActivity(),new JSONArray());
+                    adapter = new ImageAdapter(getActivity(),new ArrayList<Movie>());
                     new FetchMovies().execute(topRatedMoviesURL,"1");
                     editor.putString(getString(R.string.sort_mode_key), getString(R.string.sort_top_rated));
                     item.setTitle(R.string.sort_popular);
@@ -114,14 +117,27 @@ public class MainActivityFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
 
-        adapter = new ImageAdapter(getActivity(),new JSONArray());
+        adapter = new ImageAdapter(getActivity(),new ArrayList<Movie>());
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent detailsIntent = new Intent(getActivity(),MovieDetalisActivity.class);
+                JSONObject object = null;
+                Movie movie = null;
+                try {
+                    object = new JSONObject(jsonResponse);
+                    JSONArray moviesArray = object.getJSONArray("results");
+                    JSONObject movieJson = moviesArray.getJSONObject(position);
+                    movie = new Movie(movieJson.getString("id"),movieJson.getString("original_title")
+                    ,movieJson.getString("release_date"),movieJson.getString("vote_average"),movieJson.getString("overview")
+                    ,movieJson.getString("poster_path"),movieJson.getString("backdrop_path"));
 
-                detailsIntent.putExtra(getString(R.string.movie_details_extra_key),adapter.getItem(position).toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+               detailsIntent.putExtra(getString(R.string.movie_details_extra_key),movie);
 
                 startActivity(detailsIntent);
             }
@@ -146,26 +162,39 @@ public class MainActivityFragment extends Fragment {
         if (sort_pref.equals(getString(R.string.sort_popular))){
             new FetchMovies().execute(popularMoviesURL,"1");
         }else{
-            new FetchMovies().execute(topRatedMoviesURL,"1");
+            new FetchMovies().execute(topRatedMoviesURL, "1");
         }
 
     }
 
-    public class FetchMovies extends AsyncTask<String, Void, JSONArray> {
+    public class FetchMovies extends AsyncTask<String, Void, List<Movie>> {
 
         private final String LOG_TAG = FetchMovies.class.getSimpleName();
         private String moviesJsonStr;
 
 
-        private JSONArray getMoviesfromJson(String moviesJson) throws JSONException {
+        private List<Movie> getMoviesfromJson(String moviesJson) throws JSONException {
             JSONObject object = new JSONObject(moviesJson);
-            JSONArray movies = object.getJSONArray("results");
+            JSONArray moviesArray = object.getJSONArray("results");
+            List<Movie> movies = new ArrayList<>();
+            Movie movie;
+            for (int i = 0; i < moviesArray.length(); i++) {
+                JSONObject jsonMovie = (JSONObject) moviesArray.get(i);
+                Log.e("MOVIEJSON",jsonMovie.getString("poster_path"));
+                if (!jsonMovie.getString("poster_path").equals("null")) {
+                    movie = new Movie(jsonMovie.getString("id"), jsonMovie.getString("original_title"), jsonMovie.getString("poster_path"));
+                }else{
+                    Log.e("MOVIESJSON","ELSE");
+                    movie = new Movie(jsonMovie.getString("id"), jsonMovie.getString("original_title"), jsonMovie.getString("backdrop_path"));
+                }
+                movies.add(movie);
+            }
             return movies;
 
         }
 
         @Override
-        protected JSONArray doInBackground(String... params) {
+        protected List<Movie> doInBackground(String... params) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
             Uri uri = Uri.parse(params[0]).buildUpon().appendQueryParameter("page",params[1]).build();
@@ -222,6 +251,7 @@ public class MainActivityFragment extends Fragment {
                 }
             }
             try {
+                jsonResponse = moviesJsonStr;
                 return getMoviesfromJson(moviesJsonStr);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -230,7 +260,7 @@ public class MainActivityFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(JSONArray result) {
+        protected void onPostExecute(List<Movie> result) {
             if (result != null) {
                 Log.e(LOG_TAG, String.valueOf(adapter.getCount()));
                 if (adapter.isEmpty()){
@@ -240,11 +270,9 @@ public class MainActivityFragment extends Fragment {
                     adapter.add(result);
                     adapter.notifyDataSetChanged();
                 }
-
-
             }
-
         }
     }
+
 }
 

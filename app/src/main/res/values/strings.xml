@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="http://schemas.android.com/apk/res/android">
     <string name="app_name">Popular Movies</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -10,7 +10,10 @@
     <string name="popular_path">popular</string>
     <string name="api_key_query_param">api_key</string>
     <string name="top_rated_path">top_rated</string>
-    <string name="movie_details_extra_key">movieDetails</string>
+    <string name="movie_details_extra_key">selectedMovie</string>
     <string name="poster_base_url">http://image.tmdb.org/t/p/w342</string>
     <string name="movie_db_api_key">9c3654aee5aea28f21963eeebfd6f4a0</string>
+    <string name="poster_image_url">
+        http://img.youtube.com/vi/<xliff:g id="id">%1$s</xliff:g>/default.jpg
+    </string>
 </resources>
