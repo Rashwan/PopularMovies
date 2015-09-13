@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -50,19 +51,18 @@ public class ImageAdapter extends BaseAdapter {
         String nameString = movie.getTitle();
 
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
         View movieView = convertView;
         if (convertView == null) {
             movieView = inflater.inflate(R.layout.movie_item, null);
 
         }
-        SquaredImageView poster = (SquaredImageView) movieView.findViewById(R.id.movie_poster);
+
+        ImageView poster = (ImageView) movieView.findViewById(R.id.movie_poster);
         TextView name = (TextView) movieView.findViewById(R.id.movie_name);
         LinearLayout girdLayout = (LinearLayout) movieView.findViewById(R.id.gird_layout);
 
         name.setText(nameString);
-        //Picasso.with(mContext).load(posterUrl).into(poster);
-        Picasso.with(mContext).load(posterUri).fit().centerCrop().into(poster
+        Picasso.with(mContext).load(posterUri).fit().into(poster
                 , PicassoPalette.with(posterUri.toString(), poster)
                 .use(PicassoPalette.Profile.MUTED_LIGHT)
                 .intoBackground(girdLayout)

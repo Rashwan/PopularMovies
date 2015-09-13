@@ -42,7 +42,8 @@ public class MainActivityFragment extends Fragment {
     private SharedPreferences menu_sp ;
     private SharedPreferences.Editor editor;
     private String sort_pref;
-    private String jsonResponse;
+    private JSONArray jsonResponse = new JSONArray();
+    private int scrollPage = 1;
 
     public MainActivityFragment() {
     }
@@ -85,6 +86,8 @@ public class MainActivityFragment extends Fragment {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+        jsonResponse = new JSONArray();
+        scrollPage = 1;
         switch (item.getItemId()){
 
             case R.id.action_settings :
@@ -93,15 +96,18 @@ public class MainActivityFragment extends Fragment {
             case R.id.action_sort :
                 if (item.getTitle().equals(getString(R.string.sort_popular))){
                     adapter = new ImageAdapter(getActivity(),new ArrayList<Movie>());
-                    new FetchMovies().execute(popularMoviesURL,"1");
+                    Log.e("ONSELECTLPOP", popularMoviesURL + String.valueOf(scrollPage));
                     editor.putString(getString(R.string.sort_mode_key), getString(R.string.sort_popular));
                     item.setTitle(R.string.sort_top_rated);
+                    new FetchMovies().execute(popularMoviesURL, String.valueOf(scrollPage));
+
 
                 }else{
                     adapter = new ImageAdapter(getActivity(),new ArrayList<Movie>());
-                    new FetchMovies().execute(topRatedMoviesURL,"1");
+                    Log.e("ONSELECTLTOP", topRatedMoviesURL + String.valueOf(scrollPage));
                     editor.putString(getString(R.string.sort_mode_key), getString(R.string.sort_top_rated));
                     item.setTitle(R.string.sort_popular);
+                    new FetchMovies().execute(topRatedMoviesURL,String.valueOf(scrollPage));
                 }
 
                 editor.commit();
@@ -126,9 +132,7 @@ public class MainActivityFragment extends Fragment {
                 JSONObject object = null;
                 Movie movie = null;
                 try {
-                    object = new JSONObject(jsonResponse);
-                    JSONArray moviesArray = object.getJSONArray("results");
-                    JSONObject movieJson = moviesArray.getJSONObject(position);
+                    JSONObject movieJson = jsonResponse.getJSONObject(position);
                     movie = new Movie(movieJson.getString("id"),movieJson.getString("original_title")
                     ,movieJson.getString("release_date"),movieJson.getString("vote_average"),movieJson.getString("overview")
                     ,movieJson.getString("poster_path"),movieJson.getString("backdrop_path"));
@@ -142,13 +146,19 @@ public class MainActivityFragment extends Fragment {
                 startActivity(detailsIntent);
             }
         });
-        gridView.setOnScrollListener(new EndlessScrollListener() {
+        gridView.setOnScrollListener(new EndlessScrollListener(5,1) {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
+                scrollPage++;
+                sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), (getString(R.string.sort_popular)));
+                Log.e("ONLOADSORTPREF",sort_pref.toString());
                 if (sort_pref.equals(getString(R.string.sort_popular))){
-                    new FetchMovies().execute(popularMoviesURL,Integer.valueOf(page+1).toString());
+                    Log.e("ONSCROLLPOP",popularMoviesURL + String.valueOf(scrollPage));
+
+                    new FetchMovies().execute(popularMoviesURL,String.valueOf(scrollPage));
                 }else{
-                    new FetchMovies().execute(topRatedMoviesURL,Integer.valueOf(page+1).toString());
+                    Log.e("ONSCROLLTOP",topRatedMoviesURL + String.valueOf(scrollPage));
+                    new FetchMovies().execute(topRatedMoviesURL,String.valueOf(scrollPage));
                 }
             }
         });
@@ -159,10 +169,15 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        if (sort_pref.equals(getString(R.string.sort_popular))){
-            new FetchMovies().execute(popularMoviesURL,"1");
-        }else{
-            new FetchMovies().execute(topRatedMoviesURL, "1");
+        sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), (getString(R.string.sort_popular)));
+        if (adapter.isEmpty()) {
+            if (sort_pref.equals(getString(R.string.sort_popular))) {
+                Log.e("ONSTARTPOP",popularMoviesURL +String.valueOf(scrollPage) );
+                new FetchMovies().execute(popularMoviesURL, String.valueOf(scrollPage));
+            } else {
+                Log.e("ONSTARTTOP",topRatedMoviesURL +String.valueOf(scrollPage));
+                new FetchMovies().execute(topRatedMoviesURL, String.valueOf(scrollPage));
+            }
         }
 
     }
@@ -173,18 +188,14 @@ public class MainActivityFragment extends Fragment {
         private String moviesJsonStr;
 
 
-        private List<Movie> getMoviesfromJson(String moviesJson) throws JSONException {
-            JSONObject object = new JSONObject(moviesJson);
-            JSONArray moviesArray = object.getJSONArray("results");
+        private List<Movie> getMoviesfromJson(JSONArray moviesArray) throws JSONException {
             List<Movie> movies = new ArrayList<>();
             Movie movie;
             for (int i = 0; i < moviesArray.length(); i++) {
                 JSONObject jsonMovie = (JSONObject) moviesArray.get(i);
-                Log.e("MOVIEJSON",jsonMovie.getString("poster_path"));
                 if (!jsonMovie.getString("poster_path").equals("null")) {
                     movie = new Movie(jsonMovie.getString("id"), jsonMovie.getString("original_title"), jsonMovie.getString("poster_path"));
                 }else{
-                    Log.e("MOVIESJSON","ELSE");
                     movie = new Movie(jsonMovie.getString("id"), jsonMovie.getString("original_title"), jsonMovie.getString("backdrop_path"));
                 }
                 movies.add(movie);
@@ -251,8 +262,12 @@ public class MainActivityFragment extends Fragment {
                 }
             }
             try {
-                jsonResponse = moviesJsonStr;
-                return getMoviesfromJson(moviesJsonStr);
+                JSONObject object = new JSONObject(moviesJsonStr);
+                JSONArray moviesArray = object.getJSONArray("results");
+                for (int i = 0; i < moviesArray.length(); i++) {
+                    jsonResponse.put(moviesArray.getJSONObject(i));
+                }
+                return getMoviesfromJson(moviesArray);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -262,7 +277,6 @@ public class MainActivityFragment extends Fragment {
         @Override
         protected void onPostExecute(List<Movie> result) {
             if (result != null) {
-                Log.e(LOG_TAG, String.valueOf(adapter.getCount()));
                 if (adapter.isEmpty()){
                     adapter.add(result);
                     gridView.setAdapter(adapter);
