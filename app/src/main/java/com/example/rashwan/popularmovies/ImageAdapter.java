@@ -64,9 +64,9 @@ public class ImageAdapter extends BaseAdapter {
         name.setText(nameString);
         Picasso.with(mContext).load(posterUri).fit().into(poster
                 , PicassoPalette.with(posterUri.toString(), poster)
-                .use(PicassoPalette.Profile.MUTED_LIGHT)
+                .use(PicassoPalette.Profile.VIBRANT)
                 .intoBackground(girdLayout)
-                .intoTextColor(name, PicassoPalette.Swatch.TITLE_TEXT_COLOR));
+                .intoTextColor(name, PicassoPalette.Swatch.BODY_TEXT_COLOR));
         return movieView;
     }
 
