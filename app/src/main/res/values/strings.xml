@@ -3,9 +3,12 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_movie_detalis">MovieDetalisActivity</string>
-    <string name="sort_top_rated">Sort by : Top Rated</string>
-    <string name="sort_popular">Sort By : Popular</string>
+    <string name="sort_top_rated_title">Sort by : Top Rated</string>
+    <string name="sort_popular_title">Sort By : Popular</string>
     <string name="sort_mode_key">sort_mode</string>
+    <string name="sort_mode_popular">popular</string>
+    <string name="sort_mode_top_rated">topRated</string>
+    <string name="sort_mode_favorites">favorites</string>
     <string name="movies_base_url">http://api.themoviedb.org/3/movie/</string>
     <string name="popular_path">popular</string>
     <string name="api_key_query_param">api_key</string>
@@ -16,4 +19,5 @@
     <string name="poster_image_url">
         http://img.youtube.com/vi/<xliff:g id="id">%1$s</xliff:g>/default.jpg
     </string>
+    <string name="pref_favorites_title">Favorites</string>
 </resources>

@@ -16,8 +16,11 @@ public class Movie implements Parcelable {
     private String voteAverage;
     private String plot;
     private Uri posterUri;
+    private String posterPath;
     private Uri homeUri;
+    private String homePath;
     private Uri blurPosterUri;
+    private String blurPosterPath;
     private List<Trailer> trailers;
     private List<Review> reviews;
 
@@ -26,12 +29,16 @@ public class Movie implements Parcelable {
     private static final String BLUR_POSTER_BASE_URL = "http://image.tmdb.org/t/p/w342";
 
 
-    public Movie(String id, String title, String releaseDate, String voteAverage, String plot, String posterPath, String blurPosterPath) {
+    public Movie(String id, String title, String releaseDate, String voteAverage, String plot, String homePath ,String posterPath, String blurPosterPath) {
         this.id = id;
         this.title = title;
         this.releaseDate = releaseDate;
         this.voteAverage = voteAverage;
         this.plot = plot;
+        this.homePath = homePath;
+        this.posterPath = posterPath;
+        this.blurPosterPath =  blurPosterPath;
+        this.homeUri = Uri.parse(HOME_BASE_URL).buildUpon().appendEncodedPath(homePath).build();
         this.posterUri = Uri.parse(POSTER_BASE_URL).buildUpon().appendEncodedPath(posterPath).build();
         this.blurPosterUri = Uri.parse(BLUR_POSTER_BASE_URL).buildUpon().appendEncodedPath(blurPosterPath).build();
     }
@@ -49,9 +56,13 @@ public class Movie implements Parcelable {
         voteAverage = in.readString();
         plot = in.readString();
         posterUri = in.readParcelable(Uri.class.getClassLoader());
+        posterPath = in.readString();
         homeUri = in.readParcelable(Uri.class.getClassLoader());
+        homePath = in.readString();
         blurPosterUri = in.readParcelable(Uri.class.getClassLoader());
+        blurPosterPath = in.readString();
     }
+
 
     public static final Creator<Movie> CREATOR = new Creator<Movie>() {
         @Override
@@ -85,6 +96,18 @@ public class Movie implements Parcelable {
         return plot;
     }
 
+    public String getPosterPath() {
+        return posterPath;
+    }
+
+    public String getHomePath() {
+        return homePath;
+    }
+
+    public String getBlurPosterPath() {
+        return blurPosterPath;
+    }
+
     public Uri getPosterUri() {
         return posterUri;
     }
@@ -109,6 +132,10 @@ public class Movie implements Parcelable {
         this.reviews = reviews;
     }
 
+    public Uri getBlurPosterUri() {
+        return blurPosterUri;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -122,11 +149,10 @@ public class Movie implements Parcelable {
         dest.writeString(voteAverage);
         dest.writeString(plot);
         dest.writeParcelable(posterUri, flags);
+        dest.writeString(posterPath);
         dest.writeParcelable(homeUri, flags);
+        dest.writeString(homePath);
         dest.writeParcelable(blurPosterUri, flags);
-    }
-
-    public Uri getBlurPosterUri() {
-        return blurPosterUri;
+        dest.writeString(blurPosterPath);
     }
 }

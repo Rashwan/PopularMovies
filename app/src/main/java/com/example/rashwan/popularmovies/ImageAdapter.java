@@ -2,6 +2,7 @@ package com.example.rashwan.popularmovies;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,10 +24,12 @@ public class ImageAdapter extends BaseAdapter {
     private Context mContext;
     private List<Movie> mMovies = new ArrayList<>();
     public static final String BASE_URL = "http://image.tmdb.org/t/p/w185/";
+    boolean isConnected ;
 
     public ImageAdapter(Context context,List<Movie> movies) {
         this.mContext = context;
         this.mMovies = movies;
+        isConnected = Utilities.checkConnectivity(mContext);
     }
 
     @Override
@@ -62,11 +65,21 @@ public class ImageAdapter extends BaseAdapter {
         LinearLayout girdLayout = (LinearLayout) movieView.findViewById(R.id.gird_layout);
 
         name.setText(nameString);
-        Picasso.with(mContext).load(posterUri).fit().into(poster
-                , PicassoPalette.with(posterUri.toString(), poster)
-                .use(PicassoPalette.Profile.VIBRANT)
-                .intoBackground(girdLayout)
-                .intoTextColor(name, PicassoPalette.Swatch.BODY_TEXT_COLOR));
+        if (isConnected) {
+            Picasso.with(mContext).load(posterUri).fit().into(poster
+                    , PicassoPalette.with(posterUri.toString(), poster)
+                    .use(PicassoPalette.Profile.VIBRANT)
+                    .intoBackground(girdLayout)
+                    .intoTextColor(name, PicassoPalette.Swatch.BODY_TEXT_COLOR));
+        }else{
+            Log.e("imageAdapter","Offline");
+            Picasso.with(mContext).load(posterUri).fit().into(poster
+                    , PicassoPalette.with(posterUri.toString(), poster)
+                    .use(PicassoPalette.Profile.VIBRANT)
+                    .intoBackground(girdLayout)
+                    .intoTextColor(name, PicassoPalette.Swatch.BODY_TEXT_COLOR));
+        }
+
         return movieView;
     }
 

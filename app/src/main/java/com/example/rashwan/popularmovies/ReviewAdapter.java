@@ -1,7 +1,6 @@
 package com.example.rashwan.popularmovies;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +43,6 @@ public class ReviewAdapter extends BaseAdapter {
         TextView reviewAuthor = (TextView) reviewView.findViewById(R.id.review_author);
         TextView reviewContent = (TextView) reviewView.findViewById(R.id.review_content);
         Review review = (Review) getItem(position);
-        Log.e("REVIEWADAPTER","GETVIEW");
         reviewAuthor.setText(review.getAuthor());
         reviewContent.setText(review.getContent());
         return reviewView;

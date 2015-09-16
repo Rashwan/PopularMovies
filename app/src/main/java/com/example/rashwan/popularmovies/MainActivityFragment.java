@@ -17,6 +17,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+import com.example.rashwan.popularmovies.provider.movie.MovieCursor;
+import com.example.rashwan.popularmovies.provider.movie.MovieSelection;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,6 +47,9 @@ public class MainActivityFragment extends Fragment {
     private String sort_pref;
     private JSONArray jsonResponse = new JSONArray();
     private int scrollPage = 1;
+    private String modePopular;
+    private String modeTopRated;
+    private String modeFavorites;
 
     public MainActivityFragment() {
     }
@@ -53,8 +59,11 @@ public class MainActivityFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         menu_sp = getActivity().getPreferences(Context.MODE_PRIVATE);
-        sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), (getString(R.string.sort_popular)));
+        sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), getString(R.string.sort_mode_popular));
         editor = menu_sp.edit();
+        modePopular = getString(R.string.sort_mode_popular);
+        modeTopRated = getString(R.string.sort_mode_top_rated);
+        modeFavorites = getString(R.string.sort_mode_favorites);
 
         //Build popular movies query URL
         Uri popularURI = Uri.parse(getString(R.string.movies_base_url)).buildUpon()
@@ -74,11 +83,6 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_main_fragment, menu);
-        if (sort_pref.equals(getString(R.string.sort_popular))){
-            menu.getItem(0).setTitle(R.string.sort_top_rated);
-        }else{
-            menu.getItem(0).setTitle(R.string.sort_popular);
-        }
     }
 
     @Override
@@ -88,29 +92,43 @@ public class MainActivityFragment extends Fragment {
         // as you specify a parent activity in AndroidManifest.xml.
         jsonResponse = new JSONArray();
         scrollPage = 1;
+        sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
         switch (item.getItemId()){
 
             case R.id.action_settings :
                 return true;
 
-            case R.id.action_sort :
-                if (item.getTitle().equals(getString(R.string.sort_popular))){
+            case R.id.action_sort_popular :
+
+                if ((sort_pref.equals(modeTopRated)) || (sort_pref.equals(modeFavorites))){
+
                     adapter = new ImageAdapter(getActivity(),new ArrayList<Movie>());
-                    Log.e("ONSELECTLPOP", popularMoviesURL + String.valueOf(scrollPage));
-                    editor.putString(getString(R.string.sort_mode_key), getString(R.string.sort_popular));
-                    item.setTitle(R.string.sort_top_rated);
+                    editor.putString(getString(R.string.sort_mode_key), modePopular);
+                    editor.commit();
                     new FetchMovies().execute(popularMoviesURL, String.valueOf(scrollPage));
 
 
-                }else{
-                    adapter = new ImageAdapter(getActivity(),new ArrayList<Movie>());
-                    Log.e("ONSELECTLTOP", topRatedMoviesURL + String.valueOf(scrollPage));
-                    editor.putString(getString(R.string.sort_mode_key), getString(R.string.sort_top_rated));
-                    item.setTitle(R.string.sort_popular);
-                    new FetchMovies().execute(topRatedMoviesURL,String.valueOf(scrollPage));
                 }
-
                 editor.commit();
+                return true;
+
+            case R.id.action_sort_top_rated:
+
+                if ((sort_pref.equals(modePopular))|| (sort_pref.equals(modeFavorites))) {
+                    adapter = new ImageAdapter(getActivity(), new ArrayList<Movie>());
+                    editor.putString(getString(R.string.sort_mode_key), modeTopRated);
+                    new FetchMovies().execute(topRatedMoviesURL, String.valueOf(scrollPage));
+                }
+                editor.commit();
+                Log.e("SORTPREF",sort_pref);
+                return true;
+
+            case R.id.action_favorite:
+                if ((sort_pref.equals(modePopular))|| (sort_pref.equals(modeTopRated))) {
+                    editor.putString(getString(R.string.sort_mode_key), modeFavorites);
+                    editor.commit();
+                    getFavorites();
+                }
                 return true;
         }
 
@@ -129,16 +147,19 @@ public class MainActivityFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent detailsIntent = new Intent(getActivity(),MovieDetalisActivity.class);
-                JSONObject object = null;
                 Movie movie = null;
-                try {
-                    JSONObject movieJson = jsonResponse.getJSONObject(position);
-                    movie = new Movie(movieJson.getString("id"),movieJson.getString("original_title")
-                    ,movieJson.getString("release_date"),movieJson.getString("vote_average"),movieJson.getString("overview")
-                    ,movieJson.getString("poster_path"),movieJson.getString("backdrop_path"));
+                if (!sort_pref.equals(modeFavorites)) {
+                    try {
+                        JSONObject movieJson = jsonResponse.getJSONObject(position);
+                        movie = new Movie(movieJson.getString("id"), movieJson.getString("original_title")
+                                , movieJson.getString("release_date"), movieJson.getString("vote_average"), movieJson.getString("overview")
+                                , movieJson.getString("poster_path"), movieJson.getString("poster_path"), movieJson.getString("backdrop_path"));
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }else{
+                    movie = (Movie) adapter.getItem(position);
                 }
 
                detailsIntent.putExtra(getString(R.string.movie_details_extra_key),movie);
@@ -146,19 +167,17 @@ public class MainActivityFragment extends Fragment {
                 startActivity(detailsIntent);
             }
         });
-        gridView.setOnScrollListener(new EndlessScrollListener(5,1) {
+        gridView.setOnScrollListener(new EndlessScrollListener(5, 1) {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
+                sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
                 scrollPage++;
-                sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), (getString(R.string.sort_popular)));
-                Log.e("ONLOADSORTPREF",sort_pref.toString());
-                if (sort_pref.equals(getString(R.string.sort_popular))){
-                    Log.e("ONSCROLLPOP",popularMoviesURL + String.valueOf(scrollPage));
 
-                    new FetchMovies().execute(popularMoviesURL,String.valueOf(scrollPage));
-                }else{
-                    Log.e("ONSCROLLTOP",topRatedMoviesURL + String.valueOf(scrollPage));
-                    new FetchMovies().execute(topRatedMoviesURL,String.valueOf(scrollPage));
+                if (sort_pref.equals(modePopular)) {
+                    new FetchMovies().execute(popularMoviesURL, String.valueOf(scrollPage));
+
+                } else if (sort_pref.equals(modeTopRated)) {
+                    new FetchMovies().execute(topRatedMoviesURL, String.valueOf(scrollPage));
                 }
             }
         });
@@ -169,14 +188,15 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), (getString(R.string.sort_popular)));
+        sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
         if (adapter.isEmpty()) {
-            if (sort_pref.equals(getString(R.string.sort_popular))) {
-                Log.e("ONSTARTPOP",popularMoviesURL +String.valueOf(scrollPage) );
+            if (sort_pref.equals(modePopular)) {
                 new FetchMovies().execute(popularMoviesURL, String.valueOf(scrollPage));
-            } else {
-                Log.e("ONSTARTTOP",topRatedMoviesURL +String.valueOf(scrollPage));
+
+            } else if(sort_pref.equals(modeTopRated)){
                 new FetchMovies().execute(topRatedMoviesURL, String.valueOf(scrollPage));
+            }else {
+                getFavorites();
             }
         }
 
@@ -286,6 +306,25 @@ public class MainActivityFragment extends Fragment {
                 }
             }
         }
+    }
+
+    private void getFavorites(){
+        MovieSelection where = new MovieSelection();
+        MovieCursor cursor = where.query(getActivity());
+        Movie movie;
+        List<Movie> movieList = new ArrayList<>();
+        while (cursor.moveToNext()) {
+
+            movie = new Movie(cursor.getMovieId(), cursor.getTitle(), cursor.getReleaseDate(), cursor.getVoteAverage(),
+                    cursor.getPlot(), cursor.getHomeUri(), cursor.getPosterUri(), cursor.getBlurPosterUri());
+            movieList.add(movie);
+            Log.e("GETFAVORITES", movie.getTitle() + movie.getHomeUri());
+        }
+
+        adapter = new ImageAdapter(getActivity(),new ArrayList<Movie>());
+        adapter.add(movieList);
+        gridView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
     }
 
 }

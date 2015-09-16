@@ -22,6 +22,10 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.rashwan.popularmovies.provider.movie.MovieColumns;
+import com.example.rashwan.popularmovies.provider.movie.MovieContentValues;
+import com.example.rashwan.popularmovies.provider.movie.MovieCursor;
+import com.example.rashwan.popularmovies.provider.movie.MovieSelection;
 import com.github.florent37.picassopalette.BitmapPalette;
 import com.github.florent37.picassopalette.PicassoPalette;
 import com.squareup.picasso.Picasso;
@@ -126,6 +130,24 @@ public class MovieDetailsActivityFragment extends Fragment {
 
             reviewAdapter = new ReviewAdapter(getActivity(),new ArrayList<Review>());
             reviewsListview.setAdapter(reviewAdapter);
+
+            MovieContentValues contentValues = new MovieContentValues();
+            contentValues.putMovieId(movie.getId()).putTitle(movie.getTitle()).putReleaseDate(movie.getReleaseDate())
+                    .putVoteAverage(movie.getVoteAverage()).putPlot(movie.getPlot()).putHomeUri(movie.getHomePath()).
+            putPosterUri(movie.getPosterPath()).putBlurPosterUri(movie.getBlurPosterPath());
+            getActivity().getContentResolver().insert(MovieColumns.CONTENT_URI, contentValues.values());
+
+            Log.e("CONTENTPROVIDER", "INSERTED");
+            Log.e("CONTENTPROVIDER", movie.getHomePath());
+
+
+            MovieSelection where = new MovieSelection();
+            MovieCursor cursor = where.query(getActivity());
+            cursor.moveToNext();
+            String result = cursor.getMovieId()+" "+cursor.getTitle()+" "+cursor.getReleaseDate()+" "+cursor.getVoteAverage()
+                    +" "+cursor.getPlot()+" "+cursor.getHomeUri()+" "+cursor.getPosterUri()+" "+cursor.getBlurPosterUri();
+            Log.e("CONTENTPROVIDER",result);
+
 
         }
 

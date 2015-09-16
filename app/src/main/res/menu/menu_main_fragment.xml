@@ -3,9 +3,21 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
 
     <item
-        android:id="@+id/action_sort"
-        android:title="@string/sort_top_rated"
+        android:id="@+id/action_sort_popular"
+        android:title="@string/sort_popular_title"
         android:orderInCategory="50"
+        app:showAsAction="never"
+        />
+    <item
+        android:id="@+id/action_sort_top_rated"
+        android:title="@string/sort_top_rated_title"
+        android:orderInCategory="60"
+        app:showAsAction="never"
+        />
+    <item
+        android:id="@+id/action_favorite"
+        android:title="@string/pref_favorites_title"
+        android:orderInCategory="40"
         app:showAsAction="never"
         />
 

@@ -3,6 +3,7 @@
     package="com.example.rashwan.popularmovies" >
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:allowBackup="true"
@@ -22,6 +23,12 @@
             android:name=".MovieDetalisActivity"
             android:label="@string/title_activity_movie_detalis" >
         </activity>
+
+        <provider
+            android:name="com.example.rashwan.popularmovies.provider.MoviesProvider"
+            android:authorities="com.example.rashwan.popularmovies.provider"
+            android:exported="false" />
+
     </application>
 
 </manifest>
