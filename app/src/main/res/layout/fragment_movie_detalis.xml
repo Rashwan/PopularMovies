@@ -103,7 +103,9 @@
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:background="?android:attr/listDivider"
-            android:padding="3dp"/>
+            android:padding="3dp"
+            android:id="@+id/reviews_divider"
+            android:visibility="gone"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -113,7 +115,9 @@
             android:text="Trailers"
             android:padding="5dp"
             android:textColor="@color/ColorPrimaryDark"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:visibility="gone"
+            android:id="@+id/trailers_header"/>
         <ListView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -124,7 +128,7 @@
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:background="?android:attr/listDivider"
-            android:padding="3dp"/>
+            android:padding="3dp" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -133,7 +137,9 @@
             android:text="Reviews"
             android:padding="5dp"
             android:textColor="@color/ColorPrimaryDark"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:visibility="gone"
+            android:id="@+id/reviews_header" />
         <ListView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

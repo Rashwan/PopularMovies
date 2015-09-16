@@ -146,6 +146,7 @@ public class MainActivityFragment extends Fragment {
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
                 Intent detailsIntent = new Intent(getActivity(),MovieDetalisActivity.class);
                 Movie movie = null;
                 if (!sort_pref.equals(modeFavorites)) {
@@ -158,8 +159,10 @@ public class MainActivityFragment extends Fragment {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                    Log.e("ItemClickNOtFavotites",movie.getBlurPosterUri().toString());
                 }else{
                     movie = (Movie) adapter.getItem(position);
+                    Log.e("ItemClickFavotites",movie.getBlurPosterUri().toString());
                 }
 
                detailsIntent.putExtra(getString(R.string.movie_details_extra_key),movie);
@@ -320,6 +323,7 @@ public class MainActivityFragment extends Fragment {
             movieList.add(movie);
             Log.e("GETFAVORITES", movie.getTitle() + movie.getHomeUri());
         }
+        cursor.close();
 
         adapter = new ImageAdapter(getActivity(),new ArrayList<Movie>());
         adapter.add(movieList);

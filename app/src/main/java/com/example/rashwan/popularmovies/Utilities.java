@@ -1,9 +1,12 @@
 package com.example.rashwan.popularmovies;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.v4.app.ShareCompat;
 import android.support.v8.renderscript.Allocation;
 import android.support.v8.renderscript.Element;
 import android.support.v8.renderscript.RenderScript;
@@ -92,5 +95,12 @@ public class Utilities {
         boolean isConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
         return isConnected;
+    }
+    public static void createShareIntent(Activity activity,String title,String trailerUrl){
+
+        ShareCompat.IntentBuilder builder = ShareCompat.IntentBuilder.from(activity)
+                .setType("text/plain")
+                .setText(activity.getString(R.string.share_text,title,trailerUrl));
+        activity.startActivity(Intent.createChooser(builder.getIntent(), activity.getString(R.string.share_chooser_title)));
     }
 }

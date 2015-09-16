@@ -13,6 +13,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -54,6 +57,9 @@ public class MovieDetailsActivityFragment extends Fragment {
     ListView trailersListview;
     ReviewAdapter reviewAdapter;
     ListView reviewsListview;
+    TextView trailersHeader;
+    TextView reviewsHeader;
+    View dividers ;
 
     private static final String TRAILER_BASE_URL ="http://api.themoviedb.org/3/movie/%s/videos";
     private static final String REVIEW_BASE_URL = "http://api.themoviedb.org/3/movie/%s/reviews";
@@ -62,12 +68,41 @@ public class MovieDetailsActivityFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_movie_details_fragment, menu);
+        if (Utilities.checkConnectivity(getActivity())){
+            menu.getItem(0).setVisible(true);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.menu_share:
+                List<Trailer> trailerList = movie.getTrailers();
+                if (!trailerList.isEmpty()) {
+                    Trailer firstTrailer = trailerList.get(0);
+                    Utilities.createShareIntent(getActivity(), movie.getTitle(), firstTrailer.getTrailerUri().toString());
+                }
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
         if (trailerAdapter.isEmpty()) {
             new FetchDetails().execute(TRAILER_BASE_URL, movie.getId());
         }if (reviewAdapter.isEmpty()){
-            new FetchDetails().execute(REVIEW_BASE_URL,movie.getId());
+            new FetchDetails().execute(REVIEW_BASE_URL, movie.getId());
         }
     }
 
@@ -89,6 +124,9 @@ public class MovieDetailsActivityFragment extends Fragment {
             TextView userRatingView = (TextView) rootView.findViewById(R.id.user_rating);
             trailersListview = (ListView) rootView.findViewById(R.id.trailers_list_view);
             reviewsListview = (ListView) rootView.findViewById(R.id.reviews_list_view);
+            trailersHeader = (TextView) rootView.findViewById(R.id.trailers_header);
+            reviewsHeader = (TextView) rootView.findViewById(R.id.reviews_header);
+            dividers = rootView.findViewById(R.id.reviews_divider);
 
 
             if (movie != null) {
@@ -304,14 +342,18 @@ public class MovieDetailsActivityFragment extends Fragment {
 
         @Override
         protected void onPostExecute(List<?>responseList) {
-            Log.e(LOG_TAG,"ONPOST");
+            Log.e(LOG_TAG, "ONPOST");
             if (responseList!=null) {
                 if (isTrailer){
+                    dividers.setVisibility(View.VISIBLE);
+                    trailersHeader.setVisibility(View.VISIBLE);
                     List<Trailer> trailersList = (List<Trailer>) responseList;
                     trailerAdapter.add(trailersList);
                     Utilities.setListViewHeightBasedOnChildren(trailersListview);
                     trailerAdapter.notifyDataSetChanged();
                 }else {
+                    dividers.setVisibility(View.VISIBLE);
+                    reviewsHeader.setVisibility(View.VISIBLE);
                     List<Review> reviewsList = (List<Review>) responseList;
                     for (Review review: reviewsList) {
                         Log.e(LOG_TAG,review.getAuthor() + ": " + review.getContent());

@@ -20,4 +20,6 @@
         http://img.youtube.com/vi/<xliff:g id="id">%1$s</xliff:g>/default.jpg
     </string>
     <string name="pref_favorites_title">Favorites</string>
+    <string name="share_text">Watch <xliff:g id="title">%1$s</xliff:g> Trailer At <xliff:g id="trailerurl">%2$s</xliff:g></string>
+    <string name="share_chooser_title">Share Movie Trailer</string>
 </resources>
