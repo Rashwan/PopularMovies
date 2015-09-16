@@ -343,20 +343,20 @@ public class MovieDetailsActivityFragment extends Fragment {
         @Override
         protected void onPostExecute(List<?>responseList) {
             Log.e(LOG_TAG, "ONPOST");
-            if (responseList!=null) {
-                if (isTrailer){
-                    dividers.setVisibility(View.VISIBLE);
+            if (responseList!=null && !responseList.isEmpty()) {
+                dividers.setVisibility(View.VISIBLE);
+                if (isTrailer) {
                     trailersHeader.setVisibility(View.VISIBLE);
                     List<Trailer> trailersList = (List<Trailer>) responseList;
                     trailerAdapter.add(trailersList);
                     Utilities.setListViewHeightBasedOnChildren(trailersListview);
                     trailerAdapter.notifyDataSetChanged();
-                }else {
-                    dividers.setVisibility(View.VISIBLE);
+
+                } else {
                     reviewsHeader.setVisibility(View.VISIBLE);
                     List<Review> reviewsList = (List<Review>) responseList;
-                    for (Review review: reviewsList) {
-                        Log.e(LOG_TAG,review.getAuthor() + ": " + review.getContent());
+                    for (Review review : reviewsList) {
+                        Log.e(LOG_TAG, review.getAuthor() + ": " + review.getContent());
                     }
                     reviewAdapter.add(reviewsList);
                     Utilities.setListViewHeightBasedOnChildren(reviewsListview);

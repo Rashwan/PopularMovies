@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.LinearLayout;
 
 import com.example.rashwan.popularmovies.provider.movie.MovieCursor;
 import com.example.rashwan.popularmovies.provider.movie.MovieSelection;
@@ -41,7 +42,8 @@ public class MainActivityFragment extends Fragment {
     private String popularMoviesURL;
     private String topRatedMoviesURL;
     private ImageAdapter adapter;
-    public GridView gridView;
+    private GridView gridView;
+    private LinearLayout offlineView;
     private SharedPreferences menu_sp ;
     private SharedPreferences.Editor editor;
     private String sort_pref;
@@ -93,34 +95,39 @@ public class MainActivityFragment extends Fragment {
         jsonResponse = new JSONArray();
         scrollPage = 1;
         sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
+        offlineView.setVisibility(View.GONE);
         switch (item.getItemId()){
 
             case R.id.action_settings :
                 return true;
 
             case R.id.action_sort_popular :
+                adapter = new ImageAdapter(getActivity(), new ArrayList<Movie>());
+                editor.putString(getString(R.string.sort_mode_key), modePopular);
 
-                if ((sort_pref.equals(modeTopRated)) || (sort_pref.equals(modeFavorites))){
-
-                    adapter = new ImageAdapter(getActivity(),new ArrayList<Movie>());
-                    editor.putString(getString(R.string.sort_mode_key), modePopular);
-                    editor.commit();
-                    new FetchMovies().execute(popularMoviesURL, String.valueOf(scrollPage));
-
-
+                if (Utilities.checkConnectivity(getActivity())){
+                    if ((sort_pref.equals(modeTopRated)) || (sort_pref.equals(modeFavorites))) {
+                        new FetchMovies().execute(popularMoviesURL, String.valueOf(scrollPage));
+                    }
+                }else{
+                        gridView.setAdapter(adapter);
+                        offlineView.setVisibility(View.VISIBLE);
                 }
                 editor.commit();
                 return true;
 
             case R.id.action_sort_top_rated:
-
-                if ((sort_pref.equals(modePopular))|| (sort_pref.equals(modeFavorites))) {
-                    adapter = new ImageAdapter(getActivity(), new ArrayList<Movie>());
-                    editor.putString(getString(R.string.sort_mode_key), modeTopRated);
-                    new FetchMovies().execute(topRatedMoviesURL, String.valueOf(scrollPage));
+                adapter = new ImageAdapter(getActivity(), new ArrayList<Movie>());
+                editor.putString(getString(R.string.sort_mode_key), modeTopRated);
+                if (Utilities.checkConnectivity(getActivity())) {
+                    if ((sort_pref.equals(modePopular)) || (sort_pref.equals(modeFavorites))) {
+                        new FetchMovies().execute(topRatedMoviesURL, String.valueOf(scrollPage));
+                    }
+                }else{
+                    gridView.setAdapter(adapter);
+                    offlineView.setVisibility(View.VISIBLE);
                 }
                 editor.commit();
-                Log.e("SORTPREF",sort_pref);
                 return true;
 
             case R.id.action_favorite:
@@ -140,6 +147,7 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
+        offlineView  = (LinearLayout) rootView.findViewById(R.id.offline_view);
 
         adapter = new ImageAdapter(getActivity(),new ArrayList<Movie>());
 
@@ -193,14 +201,21 @@ public class MainActivityFragment extends Fragment {
         super.onStart();
         sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
         if (adapter.isEmpty()) {
-            if (sort_pref.equals(modePopular)) {
-                new FetchMovies().execute(popularMoviesURL, String.valueOf(scrollPage));
+            if (Utilities.checkConnectivity(getActivity())){
+                if (sort_pref.equals(modePopular)) {
+                    new FetchMovies().execute(popularMoviesURL, String.valueOf(scrollPage));
 
-            } else if(sort_pref.equals(modeTopRated)){
-                new FetchMovies().execute(topRatedMoviesURL, String.valueOf(scrollPage));
+                } else if(sort_pref.equals(modeTopRated)){
+                    new FetchMovies().execute(topRatedMoviesURL, String.valueOf(scrollPage));
+                }else {
+                    getFavorites();
+                }
             }else {
+                editor.putString(getString(R.string.sort_mode_key), modeFavorites);
+                editor.commit();
                 getFavorites();
             }
+
         }
 
     }

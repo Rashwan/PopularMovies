@@ -2,7 +2,6 @@ package com.example.rashwan.popularmovies;
 
 import android.content.Context;
 import android.net.Uri;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,7 +71,6 @@ public class ImageAdapter extends BaseAdapter {
                     .intoBackground(girdLayout)
                     .intoTextColor(name, PicassoPalette.Swatch.BODY_TEXT_COLOR));
         }else{
-            Log.e("imageAdapter","Offline");
             Picasso.with(mContext).load(posterUri).fit().into(poster
                     , PicassoPalette.with(posterUri.toString(), poster)
                     .use(PicassoPalette.Profile.VIBRANT)
