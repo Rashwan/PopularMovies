@@ -145,6 +145,8 @@ public class MainActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         offlineView  = (LinearLayout) rootView.findViewById(R.id.offline_view);
@@ -199,26 +201,24 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
-        if (adapter.isEmpty()) {
-            if (Utilities.checkConnectivity(getActivity())){
-                if (sort_pref.equals(modePopular)) {
-                    new FetchMovies().execute(popularMoviesURL, String.valueOf(scrollPage));
 
-                } else if(sort_pref.equals(modeTopRated)){
-                    new FetchMovies().execute(topRatedMoviesURL, String.valueOf(scrollPage));
-                }else {
-                    getFavorites();
-                }
+
+        sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
+        if (Utilities.checkConnectivity(getActivity())){
+            if (sort_pref.equals(modePopular)) {
+                new FetchMovies().execute(popularMoviesURL, String.valueOf(scrollPage));
+
+            } else if(sort_pref.equals(modeTopRated)){
+                new FetchMovies().execute(topRatedMoviesURL, String.valueOf(scrollPage));
             }else {
-                editor.putString(getString(R.string.sort_mode_key), modeFavorites);
-                editor.commit();
                 getFavorites();
             }
-
+        }else {
+            editor.putString(getString(R.string.sort_mode_key), modeFavorites);
+            editor.commit();
+            getFavorites();
         }
-
-    }
+}
 
     public class FetchMovies extends AsyncTask<String, Void, List<Movie>> {
 

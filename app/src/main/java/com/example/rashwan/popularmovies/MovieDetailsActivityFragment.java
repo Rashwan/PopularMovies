@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
@@ -18,17 +19,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.example.rashwan.popularmovies.provider.movie.MovieColumns;
-import com.example.rashwan.popularmovies.provider.movie.MovieContentValues;
-import com.example.rashwan.popularmovies.provider.movie.MovieCursor;
-import com.example.rashwan.popularmovies.provider.movie.MovieSelection;
 import com.github.florent37.picassopalette.BitmapPalette;
 import com.github.florent37.picassopalette.PicassoPalette;
 import com.squareup.picasso.Picasso;
@@ -60,6 +59,8 @@ public class MovieDetailsActivityFragment extends Fragment {
     TextView trailersHeader;
     TextView reviewsHeader;
     View dividers ;
+    Boolean isFavorite;
+    Boolean isLollipop;
 
     private static final String TRAILER_BASE_URL ="http://api.themoviedb.org/3/movie/%s/videos";
     private static final String REVIEW_BASE_URL = "http://api.themoviedb.org/3/movie/%s/reviews";
@@ -99,22 +100,28 @@ public class MovieDetailsActivityFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+
         if (trailerAdapter.isEmpty()) {
             new FetchDetails().execute(TRAILER_BASE_URL, movie.getId());
         }if (reviewAdapter.isEmpty()){
             new FetchDetails().execute(REVIEW_BASE_URL, movie.getId());
         }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         final View rootView = inflater.inflate(R.layout.fragment_movie_detalis, container, false);
         Intent intent = getActivity().getIntent();
 
         //get movie object and parse it
         if (intent.hasExtra(getString(R.string.movie_details_extra_key))) {
             movie = intent.getParcelableExtra(getString(R.string.movie_details_extra_key));
+
+            isFavorite = Utilities.checkFavorite(movie.getId(),getActivity());
+            isLollipop = Utilities.isLollipopandAbove();
 
             TextView titleView = (TextView) rootView.findViewById(R.id.title);
             final ImageView blur_poster = (ImageView) rootView.findViewById(R.id.blur_poster);
@@ -127,8 +134,38 @@ public class MovieDetailsActivityFragment extends Fragment {
             trailersHeader = (TextView) rootView.findViewById(R.id.trailers_header);
             reviewsHeader = (TextView) rootView.findViewById(R.id.reviews_header);
             dividers = rootView.findViewById(R.id.reviews_divider);
+            final FloatingActionButton fabFavorite = (FloatingActionButton) rootView.findViewById(R.id.fab_favorite);
+            final ScrollView scrollView = (ScrollView) rootView.findViewById(R.id.scrollView);
+            Log.e("isFavoriteOncreate",isFavorite.toString());
+            Utilities.updateHeartButton(fabFavorite,isLollipop,isFavorite);
 
-
+            final int[] oldY = {0};
+            scrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
+                @Override
+                public void onScrollChanged() {
+                    int scrollY = scrollView.getScrollY();
+                    if (scrollY <= 0) {
+                        fabFavorite.show();
+                    } else if (scrollY > oldY[0]) {
+                        fabFavorite.hide();
+                    } else {
+                        fabFavorite.show();
+                    }
+                    oldY[0] = scrollY;
+                }
+            });
+            fabFavorite.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (isFavorite){
+                        Utilities.movieDisliked(movie.getId(),getActivity());
+                    }else {
+                        Utilities.movieLiked(movie, getActivity());
+                    }
+                    isFavorite = Utilities.checkFavorite(movie.getId(),getActivity());
+                    Utilities.updateHeartButton((FloatingActionButton) v,isLollipop,isFavorite);
+                }
+            });
             if (movie != null) {
                 Uri blurPosterUri = movie.getBlurPosterUri();
 
@@ -168,23 +205,6 @@ public class MovieDetailsActivityFragment extends Fragment {
 
             reviewAdapter = new ReviewAdapter(getActivity(),new ArrayList<Review>());
             reviewsListview.setAdapter(reviewAdapter);
-
-            MovieContentValues contentValues = new MovieContentValues();
-            contentValues.putMovieId(movie.getId()).putTitle(movie.getTitle()).putReleaseDate(movie.getReleaseDate())
-                    .putVoteAverage(movie.getVoteAverage()).putPlot(movie.getPlot()).putHomeUri(movie.getHomePath()).
-            putPosterUri(movie.getPosterPath()).putBlurPosterUri(movie.getBlurPosterPath());
-            getActivity().getContentResolver().insert(MovieColumns.CONTENT_URI, contentValues.values());
-
-            Log.e("CONTENTPROVIDER", "INSERTED");
-            Log.e("CONTENTPROVIDER", movie.getHomePath());
-
-
-            MovieSelection where = new MovieSelection();
-            MovieCursor cursor = where.query(getActivity());
-            cursor.moveToNext();
-            String result = cursor.getMovieId()+" "+cursor.getTitle()+" "+cursor.getReleaseDate()+" "+cursor.getVoteAverage()
-                    +" "+cursor.getPlot()+" "+cursor.getHomeUri()+" "+cursor.getPosterUri()+" "+cursor.getBlurPosterUri();
-            Log.e("CONTENTPROVIDER",result);
 
 
         }
@@ -365,4 +385,5 @@ public class MovieDetailsActivityFragment extends Fragment {
             }
         }
     }
+
 }

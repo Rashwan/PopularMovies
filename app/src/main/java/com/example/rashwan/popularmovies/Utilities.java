@@ -1,11 +1,18 @@
 package com.example.rashwan.popularmovies;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
+import android.os.Build;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ShareCompat;
 import android.support.v8.renderscript.Allocation;
 import android.support.v8.renderscript.Element;
@@ -13,15 +20,21 @@ import android.support.v8.renderscript.RenderScript;
 import android.support.v8.renderscript.ScriptIntrinsicBlur;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+
+import com.example.rashwan.popularmovies.provider.movie.MovieColumns;
+import com.example.rashwan.popularmovies.provider.movie.MovieContentValues;
+import com.example.rashwan.popularmovies.provider.movie.MovieCursor;
+import com.example.rashwan.popularmovies.provider.movie.MovieSelection;
 
 /**
  * Created by rashwan on 9/13/15.
  */
 public class Utilities {
 
-    public static Bitmap blurRenderScript(Bitmap smallBitmap, int radius,Context context) {
+    public static Bitmap blurRenderScript(Bitmap smallBitmap, int radius, Context context) {
 
         try {
             smallBitmap = RGB565toARGB888(smallBitmap);
@@ -87,20 +100,84 @@ public class Utilities {
         listView.setLayoutParams(params);
         listView.requestLayout();
     }
-    public static Boolean checkConnectivity(Context context){
+
+    public static Boolean checkConnectivity(Context context) {
         ConnectivityManager cm =
-                (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
         return isConnected;
     }
-    public static void createShareIntent(Activity activity,String title,String trailerUrl){
+
+    public static void createShareIntent(Activity activity, String title, String trailerUrl) {
 
         ShareCompat.IntentBuilder builder = ShareCompat.IntentBuilder.from(activity)
                 .setType("text/plain")
-                .setText(activity.getString(R.string.share_text,title,trailerUrl));
+                .setText(activity.getString(R.string.share_text, title, trailerUrl));
         activity.startActivity(Intent.createChooser(builder.getIntent(), activity.getString(R.string.share_chooser_title)));
     }
+
+    public static void updateHeartButton(final FloatingActionButton fab, Boolean isLollipop, final Boolean isFavorite) {
+        if (isLollipop) {
+            AnimatorSet animatorSet = new AnimatorSet();
+
+            ObjectAnimator bounceAnimX = ObjectAnimator.ofFloat(fab, "scaleX", 0.2f, 1f);
+            bounceAnimX.setDuration(300);
+            bounceAnimX.setInterpolator(new OvershootInterpolator(4));
+
+            ObjectAnimator bounceAnimY = ObjectAnimator.ofFloat(fab, "scaleY", 0.2f, 1f);
+            bounceAnimY.setDuration(300);
+            bounceAnimY.setInterpolator(new OvershootInterpolator(4));
+            bounceAnimY.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    if (isFavorite) {
+                        fab.setImageResource(R.drawable.ic_heart_red_filled);
+                    } else {
+                        fab.setImageResource(R.drawable.ic_heart_outline_red);
+                    }
+                }
+            });
+
+            animatorSet.play(bounceAnimX).with(bounceAnimY);
+
+            animatorSet.start();
+        } else {
+            if (isFavorite) {
+                fab.setImageResource(R.drawable.ic_heart_outline_red);
+            }else{
+                fab.setImageResource(R.drawable.ic_heart_red_filled);
+            }
+        }
+    }
+
+    public static Uri movieLiked(Movie movie,Context context){
+        MovieContentValues contentValues = new MovieContentValues();
+        contentValues.putMovieId(movie.getId()).putTitle(movie.getTitle()).putReleaseDate(movie.getReleaseDate())
+                .putVoteAverage(movie.getVoteAverage()).putPlot(movie.getPlot()).putHomeUri(movie.getHomePath()).
+                putPosterUri(movie.getPosterPath()).putBlurPosterUri(movie.getBlurPosterPath());
+        return context.getContentResolver().insert(MovieColumns.CONTENT_URI, contentValues.values());
+    }
+
+    public static Boolean movieDisliked(String movieId,Context context){
+        MovieSelection where = new MovieSelection();
+        int rows = where.movieId(movieId).delete(context);
+
+       return rows!=0;
+    }
+
+    public static Boolean checkFavorite(String movieId,Context context){
+        MovieSelection where = new MovieSelection();
+        MovieCursor cursor = where.movieId(movieId).query(context);
+        Boolean isFavorite = cursor.moveToNext();
+        cursor.close();
+        return isFavorite;
+    }
+
+    public static Boolean isLollipopandAbove(){
+        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) ;
+    }
+
 }
