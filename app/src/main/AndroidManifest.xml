@@ -21,7 +21,13 @@
         </activity>
         <activity
             android:name=".MovieDetalisActivity"
-            android:label="@string/title_activity_movie_detalis" >
+            android:label="@string/title_activity_movie_detalis"
+            android:parentActivityName="com.example.rashwan.popularmovies.MainActivity" >
+            <!-- Parent activity meta-data to support API level 7+ -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.rashwan.popularmovies.MainActivity" />
+            >
         </activity>
 
         <provider

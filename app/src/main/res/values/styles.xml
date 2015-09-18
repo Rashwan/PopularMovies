@@ -1,15 +1,26 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="android:textColorPrimary">@color/color_text_primary</item>
         <item name="android:textColorSecondary">@color/color_text_secondary</item>
+        <item name="android:itemTextAppearance">@style/TextAppearance</item>
+
     </style>
     <style name="MovieDetailPlayImage">
         <item name="android:layout_gravity">center</item>
     </style>
 
+    <style name="TextAppearance">
+        <item name="android:textColor">@color/list_spinner_color</item>
+    </style>
+
+    <style name="small_expanded" parent="@android:style/TextAppearance.Medium">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">25sp</item>
+    </style>
 </resources>

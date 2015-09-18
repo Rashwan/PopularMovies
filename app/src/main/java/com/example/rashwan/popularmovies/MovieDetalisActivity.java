@@ -2,6 +2,8 @@ package com.example.rashwan.popularmovies;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -11,6 +13,15 @@ public class MovieDetalisActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_detalis);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_details);
+        setSupportActionBar(toolbar);
+        try {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        }catch (NullPointerException e){
+            e.printStackTrace();
+        }
+
     }
 
 
@@ -34,5 +45,11 @@ public class MovieDetalisActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.e("DETAILS", "ONSTOP");
+        supportFinishAfterTransition();
     }
 }

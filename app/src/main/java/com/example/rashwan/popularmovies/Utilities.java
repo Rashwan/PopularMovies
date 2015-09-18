@@ -18,6 +18,8 @@ import android.support.v8.renderscript.Allocation;
 import android.support.v8.renderscript.Element;
 import android.support.v8.renderscript.RenderScript;
 import android.support.v8.renderscript.ScriptIntrinsicBlur;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
@@ -178,6 +180,20 @@ public class Utilities {
 
     public static Boolean isLollipopandAbove(){
         return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) ;
+    }
+
+    public static void menuSortCheck(Menu menu,String sortPref, Activity activity){
+        MenuItem item;
+        if (sortPref.equals(activity.getString(R.string.sort_mode_popular))){
+            item = menu.findItem(R.id.action_sort_popular);
+            item.setChecked(true);
+        }else if (sortPref.equals(activity.getString(R.string.sort_mode_top_rated))) {
+            item = menu.findItem(R.id.action_sort_top_rated);
+            item.setChecked(true);
+        }else {
+            item = menu.findItem(R.id.action_favorite);
+            item.setChecked(true);
+        }
     }
 
 }

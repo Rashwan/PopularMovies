@@ -64,20 +64,11 @@ public class ImageAdapter extends BaseAdapter {
         LinearLayout girdLayout = (LinearLayout) movieView.findViewById(R.id.gird_layout);
 
         name.setText(nameString);
-        if (isConnected) {
-            Picasso.with(mContext).load(posterUri).fit().into(poster
-                    , PicassoPalette.with(posterUri.toString(), poster)
-                    .use(PicassoPalette.Profile.VIBRANT)
-                    .intoBackground(girdLayout)
-                    .intoTextColor(name, PicassoPalette.Swatch.BODY_TEXT_COLOR));
-        }else{
-            Picasso.with(mContext).load(posterUri).fit().into(poster
-                    , PicassoPalette.with(posterUri.toString(), poster)
-                    .use(PicassoPalette.Profile.VIBRANT)
-                    .intoBackground(girdLayout)
-                    .intoTextColor(name, PicassoPalette.Swatch.BODY_TEXT_COLOR));
-        }
-
+        Picasso.with(mContext).load(posterUri).fit().into(poster
+                , PicassoPalette.with(posterUri.toString(), poster)
+                .use(PicassoPalette.Profile.VIBRANT)
+                .intoBackground(girdLayout)
+                .intoTextColor(name, PicassoPalette.Swatch.BODY_TEXT_COLOR));
         return movieView;
     }
 

@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.example.rashwan.popularmovies.provider.movie.MovieCursor;
@@ -88,6 +91,13 @@ public class MainActivityFragment extends Fragment {
     }
 
     @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
+        Utilities.menuSortCheck(menu,sort_pref,getActivity());
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -102,6 +112,7 @@ public class MainActivityFragment extends Fragment {
                 return true;
 
             case R.id.action_sort_popular :
+                item.setChecked(true);
                 adapter = new ImageAdapter(getActivity(), new ArrayList<Movie>());
                 editor.putString(getString(R.string.sort_mode_key), modePopular);
 
@@ -117,6 +128,7 @@ public class MainActivityFragment extends Fragment {
                 return true;
 
             case R.id.action_sort_top_rated:
+                item.setChecked(true);
                 adapter = new ImageAdapter(getActivity(), new ArrayList<Movie>());
                 editor.putString(getString(R.string.sort_mode_key), modeTopRated);
                 if (Utilities.checkConnectivity(getActivity())) {
@@ -131,6 +143,8 @@ public class MainActivityFragment extends Fragment {
                 return true;
 
             case R.id.action_favorite:
+                item.setChecked(true);
+                adapter = new ImageAdapter(getActivity(), new ArrayList<Movie>());
                 if ((sort_pref.equals(modePopular))|| (sort_pref.equals(modeTopRated))) {
                     editor.putString(getString(R.string.sort_mode_key), modeFavorites);
                     editor.commit();
@@ -158,6 +172,11 @@ public class MainActivityFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
                 Intent detailsIntent = new Intent(getActivity(),MovieDetalisActivity.class);
+                ImageView gridPoster = (ImageView) view.findViewById(R.id.movie_poster);
+
+                ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation
+                        (getActivity(),gridPoster,"poster");
+
                 Movie movie = null;
                 if (!sort_pref.equals(modeFavorites)) {
                     try {
@@ -177,7 +196,7 @@ public class MainActivityFragment extends Fragment {
 
                detailsIntent.putExtra(getString(R.string.movie_details_extra_key),movie);
 
-                startActivity(detailsIntent);
+                ActivityCompat.startActivity(getActivity(),detailsIntent,optionsCompat.toBundle());
             }
         });
         gridView.setOnScrollListener(new EndlessScrollListener(5, 1) {
@@ -204,19 +223,22 @@ public class MainActivityFragment extends Fragment {
 
 
         sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
-        if (Utilities.checkConnectivity(getActivity())){
-            if (sort_pref.equals(modePopular)) {
-                new FetchMovies().execute(popularMoviesURL, String.valueOf(scrollPage));
+        if(adapter.isEmpty()) {
+            if (Utilities.checkConnectivity(getActivity())) {
 
-            } else if(sort_pref.equals(modeTopRated)){
-                new FetchMovies().execute(topRatedMoviesURL, String.valueOf(scrollPage));
-            }else {
+                if (sort_pref.equals(modePopular)) {
+                    new FetchMovies().execute(popularMoviesURL, String.valueOf(scrollPage));
+
+                } else if (sort_pref.equals(modeTopRated)) {
+                    new FetchMovies().execute(topRatedMoviesURL, String.valueOf(scrollPage));
+                } else {
+                    getFavorites();
+                }
+            } else {
+                editor.putString(getString(R.string.sort_mode_key), modeFavorites);
+                editor.commit();
                 getFavorites();
             }
-        }else {
-            editor.putString(getString(R.string.sort_mode_key), modeFavorites);
-            editor.commit();
-            getFavorites();
         }
 }
 
@@ -316,9 +338,11 @@ public class MainActivityFragment extends Fragment {
         protected void onPostExecute(List<Movie> result) {
             if (result != null) {
                 if (adapter.isEmpty()){
+                    Log.e("ONPOSTMAIN","ISEMPTY");
                     adapter.add(result);
                     gridView.setAdapter(adapter);
                 }else {
+                    Log.e("ONPOSTMAIN","NOTEMPTY");
                     adapter.add(result);
                     adapter.notifyDataSetChanged();
                 }
@@ -336,14 +360,15 @@ public class MainActivityFragment extends Fragment {
             movie = new Movie(cursor.getMovieId(), cursor.getTitle(), cursor.getReleaseDate(), cursor.getVoteAverage(),
                     cursor.getPlot(), cursor.getHomeUri(), cursor.getPosterUri(), cursor.getBlurPosterUri());
             movieList.add(movie);
-            Log.e("GETFAVORITES", movie.getTitle() + movie.getHomeUri());
         }
         cursor.close();
-
-        adapter = new ImageAdapter(getActivity(),new ArrayList<Movie>());
-        adapter.add(movieList);
-        gridView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
+        if (adapter.isEmpty()){
+            adapter.add(movieList);
+            gridView.setAdapter(adapter);
+        }else {
+            adapter.add(movieList);
+            adapter.notifyDataSetChanged();
+        }
     }
 
 }

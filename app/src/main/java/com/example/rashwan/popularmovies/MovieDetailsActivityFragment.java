@@ -3,14 +3,13 @@ package com.example.rashwan.popularmovies;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,13 +18,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.github.florent37.picassopalette.BitmapPalette;
@@ -72,6 +69,7 @@ public class MovieDetailsActivityFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
     }
 
     @Override
@@ -100,11 +98,13 @@ public class MovieDetailsActivityFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-
-        if (trailerAdapter.isEmpty()) {
-            new FetchDetails().execute(TRAILER_BASE_URL, movie.getId());
-        }if (reviewAdapter.isEmpty()){
-            new FetchDetails().execute(REVIEW_BASE_URL, movie.getId());
+        if (isAdded()) {
+            if (trailerAdapter.isEmpty()) {
+                new FetchDetails().execute(TRAILER_BASE_URL, movie.getId());
+            }
+            if (reviewAdapter.isEmpty()) {
+                new FetchDetails().execute(REVIEW_BASE_URL, movie.getId());
+            }
         }
 
     }
@@ -123,7 +123,6 @@ public class MovieDetailsActivityFragment extends Fragment {
             isFavorite = Utilities.checkFavorite(movie.getId(),getActivity());
             isLollipop = Utilities.isLollipopandAbove();
 
-            TextView titleView = (TextView) rootView.findViewById(R.id.title);
             final ImageView blur_poster = (ImageView) rootView.findViewById(R.id.blur_poster);
             ImageView poster = (ImageView) rootView.findViewById(R.id.poster);
             TextView releaseDateView = (TextView) rootView.findViewById(R.id.release_date);
@@ -134,26 +133,10 @@ public class MovieDetailsActivityFragment extends Fragment {
             trailersHeader = (TextView) rootView.findViewById(R.id.trailers_header);
             reviewsHeader = (TextView) rootView.findViewById(R.id.reviews_header);
             dividers = rootView.findViewById(R.id.reviews_divider);
-            final FloatingActionButton fabFavorite = (FloatingActionButton) rootView.findViewById(R.id.fab_favorite);
-            final ScrollView scrollView = (ScrollView) rootView.findViewById(R.id.scrollView);
-            Log.e("isFavoriteOncreate",isFavorite.toString());
+            FloatingActionButton fabFavorite = (FloatingActionButton) rootView.findViewById(R.id.fab_favorite);
+            final CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsingToolbarLayout);
             Utilities.updateHeartButton(fabFavorite,isLollipop,isFavorite);
 
-            final int[] oldY = {0};
-            scrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
-                @Override
-                public void onScrollChanged() {
-                    int scrollY = scrollView.getScrollY();
-                    if (scrollY <= 0) {
-                        fabFavorite.show();
-                    } else if (scrollY > oldY[0]) {
-                        fabFavorite.hide();
-                    } else {
-                        fabFavorite.show();
-                    }
-                    oldY[0] = scrollY;
-                }
-            });
             fabFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -180,14 +163,17 @@ public class MovieDetailsActivityFragment extends Fragment {
                                         blur_poster.setImageBitmap(Utilities.blurRenderScript(bitmap, 18, getActivity()));
 
                                         //Apply Palette  Effect
-                                        applyPalette(palette);
+                                        applyPalette(palette,collapsingToolbarLayout);
                                     }
                                 }));
                 Uri posterUri = movie.getPosterUri();
-                Picasso.with(getActivity()).load(posterUri).into(poster);
+                Picasso.with(getActivity()).load(posterUri).fit().into(poster);
 
-                //Setting up Movie Details
-                titleView.setText(movie.getTitle());
+                String movieTitle = movie.getTitle();
+                if (movieTitle.length()>33){
+                    collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.small_expanded);
+                }
+                collapsingToolbarLayout.setTitle(movieTitle);
                 releaseDateView.setText(movie.getReleaseDate());
                 plotView.setText(movie.getPlot());
                 userRatingView.setText(movie.getVoteAverage());
@@ -214,34 +200,25 @@ public class MovieDetailsActivityFragment extends Fragment {
     }
 
 
-    private void applyPalette(Palette palette){
+    private void applyPalette(Palette palette,CollapsingToolbarLayout collapsingToolbar){
         if (palette !=null) {
             Palette.Swatch vibrantSwatch = palette.getVibrantSwatch();
             if (vibrantSwatch!=null){
                 int actionBarColorRGB = vibrantSwatch.getRgb();
-
-                AppCompatActivity actionBarActivity = (AppCompatActivity) getActivity();
-                android.support.v7.app.ActionBar actionBar = actionBarActivity.getSupportActionBar();
-                if (actionBar != null) {
-                    actionBar.setBackgroundDrawable(new ColorDrawable(actionBarColorRGB));
-                }
+                collapsingToolbar.setContentScrimColor(actionBarColorRGB);
             }
-
 
             //Adding color to StatusBar
             Palette.Swatch darkVSwatch = palette.getDarkVibrantSwatch();
             if (darkVSwatch != null) {
                 int statusBarColorRGB = palette.getDarkVibrantSwatch().getRgb();
-
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     Window window = getActivity().getWindow();
                     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
                     window.setStatusBarColor(statusBarColorRGB);
                 }
             }
-
         }
-
     }
 
     public class FetchDetails extends AsyncTask<String,Void,List<?>>{
@@ -286,76 +263,76 @@ public class MovieDetailsActivityFragment extends Fragment {
 
         @Override
         protected List<?> doInBackground(String... params) {
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-            String baseURl = String.format(params[0], params[1]);
-            if (params[0].contains("videos")) {
-                isTrailer = true;
-            }else{
-                isTrailer = false;
-            }
-            Uri uri = Uri.parse(baseURl).buildUpon().appendQueryParameter(getString(R.string.api_key_query_param),getString(R.string.movie_db_api_key)).build();
-            URL url = null;
-            try {
-                url = new URL(uri.toString());
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
+            if (isAdded()) {
+                HttpURLConnection urlConnection = null;
+                BufferedReader reader = null;
+                String baseURl = String.format(params[0], params[1]);
+                if (params[0].contains("videos")) {
+                    isTrailer = true;
+                } else {
+                    isTrailer = false;
+                }
+                Uri uri = Uri.parse(baseURl).buildUpon().appendQueryParameter(getString(R.string.api_key_query_param), getString(R.string.movie_db_api_key)).build();
+                URL url = null;
+                try {
+                    url = new URL(uri.toString());
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
 
-            try {
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
+                try {
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection.setRequestMethod("GET");
+                    urlConnection.connect();
 
-                InputStream inputStream = urlConnection.getInputStream();
+                    InputStream inputStream = urlConnection.getInputStream();
 
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    // Nothing to do.
+                    StringBuffer buffer = new StringBuffer();
+                    if (inputStream == null) {
+                        // Nothing to do.
+                        return null;
+                    }
+                    reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                        // But it does make debugging a *lot* easier if you print out the completed
+                        // buffer for debugging.
+                        buffer.append(line + "\n");
+                    }
+
+                    if (buffer.length() == 0) {
+                        // Stream was empty.  No point in parsing.
+                        return null;
+                    }
+                    responseJsonString = buffer.toString();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                    Log.e(LOG_TAG, "Error ", e1);
                     return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
-                    buffer.append(line + "\n");
-                }
-
-                if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    return null;
-                }
-                responseJsonString = buffer.toString();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-                Log.e(LOG_TAG, "Error ", e1);
-                return null;
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
+                } finally {
+                    if (urlConnection != null) {
+                        urlConnection.disconnect();
+                    }
+                    if (reader != null) {
+                        try {
+                            reader.close();
+                        } catch (final IOException e) {
+                            Log.e(LOG_TAG, "Error closing stream", e);
+                        }
                     }
                 }
-            }
-
-            try {
-                if (isTrailer) {
-                    return getTrailersFromJson(responseJsonString);
-                }else{
-                    return getReviewsFromJson(responseJsonString);
+                try {
+                    if (isTrailer) {
+                        return getTrailersFromJson(responseJsonString);
+                    } else {
+                        return getReviewsFromJson(responseJsonString);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
-
 
             return null;
         }
