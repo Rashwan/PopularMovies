@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -162,6 +164,10 @@ public class MainActivityFragment extends Fragment {
 
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar_main);
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        activity.setSupportActionBar(toolbar);
+
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         offlineView  = (LinearLayout) rootView.findViewById(R.id.offline_view);
 
