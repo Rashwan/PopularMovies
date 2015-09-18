@@ -41,130 +41,129 @@
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 
-        <android.support.v4.widget.NestedScrollView
-            android:layout_height="match_parent"
+    <android.support.v4.widget.NestedScrollView
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:id="@+id/scrollView"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <LinearLayout
             android:layout_width="match_parent"
-            android:id="@+id/scrollView"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            android:layout_height="wrap_content"
+            tools:context="com.example.rashwan.popularmovies.MovieDetailsActivityFragment"
+            android:orientation="vertical"
+            android:focusableInTouchMode="true">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:context="com.example.rashwan.popularmovies.MovieDetailsActivityFragment"
-                android:orientation="vertical"
-                android:focusableInTouchMode="true">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="310dp"
-                    android:orientation="horizontal"
-                    android:padding="10dp"
-                    android:baselineAligned="false">
-                    <FrameLayout
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="match_parent">
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:minWidth="220dp"
-                            android:layout_height="fill_parent"
-                            android:layout_gravity="center_horizontal"
-                            android:id="@+id/poster"
-                            android:transitionName="poster"/>
-                    </FrameLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:padding="5dp"
-                        android:gravity="center_vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="ReleaseDate"
-                            android:id="@+id/release_date"
-                            android:layout_gravity="center_horizontal"
-                            android:textAppearance="?android:attr/textAppearanceLarge"
-                            android:padding="5dp"
-                            />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="UserRating"
-                            android:id="@+id/user_rating"
-                            android:layout_gravity="center_horizontal"
-                            android:textAppearance="?android:textAppearanceLarge"/>
-
-                    </LinearLayout>
-                </LinearLayout>
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:background="?android:attr/listDivider"
-                    android:padding="3dp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
+                android:minHeight="310dp"
+                android:orientation="horizontal"
+                android:padding="10dp"
+                android:baselineAligned="false">
+                <FrameLayout
+                    android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:text="Plot"
-                    android:id="@+id/plot"
-                    android:textAppearance="?android:textAppearanceMedium"
-                    android:padding="10dp"
-                    />
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:background="?android:attr/listDivider"
-                    android:padding="3dp"
-                    android:id="@+id/reviews_divider"
-                    android:visibility="gone"/>
+                    android:layout_height="match_parent">
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:minWidth="220dp"
+                        android:layout_height="fill_parent"
+                        android:layout_gravity="center_horizontal"
+                        android:id="@+id/poster"
+                        android:transitionName="poster"/>
+                </FrameLayout>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:textSize="25sp"
-                    android:text="Trailers"
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
                     android:padding="5dp"
-                    android:textColor="@color/color_primary_dark"
-                    android:textStyle="bold"
-                    android:visibility="gone"
-                    android:id="@+id/trailers_header"/>
-                <ListView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/trailers_list_view"
-                    android:padding="5dp">
-                </ListView>
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:background="?android:attr/listDivider"
-                    android:padding="3dp" />
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:textSize="25sp"
-                    android:text="Reviews"
-                    android:padding="5dp"
-                    android:textColor="@color/color_primary_dark"
-                    android:textStyle="bold"
-                    android:visibility="gone"
-                    android:id="@+id/reviews_header" />
-                <ListView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/reviews_list_view"
-                    android:divider="?android:attr/listDivider"
-                    android:padding="5dp">
-                </ListView>
+                    android:gravity="center_vertical">
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ReleaseDate"
+                        android:id="@+id/release_date"
+                        android:layout_gravity="center_horizontal"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:padding="5dp"
+                        />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="UserRating"
+                        android:id="@+id/user_rating"
+                        android:layout_gravity="center_horizontal"
+                        android:textAppearance="?android:textAppearanceLarge"/>
+
+                </LinearLayout>
             </LinearLayout>
-        </android.support.v4.widget.NestedScrollView>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="?android:attr/listDivider"
+                android:padding="3dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="Plot"
+                android:id="@+id/plot"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:padding="10dp"
+                />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="?android:attr/listDivider"
+                android:padding="3dp"
+                android:id="@+id/reviews_divider"
+                android:visibility="gone"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textSize="25sp"
+                android:text="Trailers"
+                android:padding="5dp"
+                android:textColor="@color/color_primary_dark"
+                android:textStyle="bold"
+                android:visibility="gone"
+                android:id="@+id/trailers_header"/>
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/trailers_list_view"
+                android:padding="5dp">
+            </ListView>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="?android:attr/listDivider"
+                android:padding="3dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textSize="25sp"
+                android:text="Reviews"
+                android:padding="5dp"
+                android:textColor="@color/color_primary_dark"
+                android:textStyle="bold"
+                android:visibility="gone"
+                android:id="@+id/reviews_header" />
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/reviews_list_view"
+                android:divider="?android:attr/listDivider">
+            </ListView>
+
+        </LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
     <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -178,5 +177,3 @@
         android:id="@+id/fab_favorite"
         />
 </android.support.design.widget.CoordinatorLayout>
-
-
