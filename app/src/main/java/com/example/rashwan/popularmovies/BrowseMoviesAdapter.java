@@ -19,13 +19,13 @@ import java.util.List;
 /**
  * Created by rashwan on 8/11/15.
  */
-public class ImageAdapter extends BaseAdapter {
+public class BrowseMoviesAdapter extends BaseAdapter {
     private Context mContext;
     private List<Movie> mMovies = new ArrayList<>();
     public static final String BASE_URL = "http://image.tmdb.org/t/p/w185/";
     boolean isConnected ;
 
-    public ImageAdapter(Context context,List<Movie> movies) {
+    public BrowseMoviesAdapter(Context context, List<Movie> movies) {
         this.mContext = context;
         this.mMovies = movies;
         isConnected = Utilities.checkConnectivity(mContext);

@@ -1,5 +1,6 @@
 package com.example.rashwan.popularmovies;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -10,7 +11,9 @@ import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -43,12 +46,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-
-/**
- * A placeholder fragment containing a simple view.
- */
 public class MovieDetailsActivityFragment extends Fragment {
-    public Movie movie;
+    Movie movie;
     TrailerAdapter trailerAdapter;
     ListView trailersListview;
     ReviewAdapter reviewAdapter;
@@ -58,6 +57,8 @@ public class MovieDetailsActivityFragment extends Fragment {
     View dividers ;
     Boolean isFavorite;
     Boolean isLollipop;
+    Toolbar toolbar;
+
 
     private static final String TRAILER_BASE_URL ="http://api.themoviedb.org/3/movie/%s/videos";
     private static final String REVIEW_BASE_URL = "http://api.themoviedb.org/3/movie/%s/reviews";
@@ -65,10 +66,20 @@ public class MovieDetailsActivityFragment extends Fragment {
     public MovieDetailsActivityFragment() {
     }
 
+    public static MovieDetailsActivityFragment newInstance(Movie movie) {
+        MovieDetailsActivityFragment detailsFragment = new MovieDetailsActivityFragment();
+        Bundle args = new Bundle();
+        args.putParcelable("movie",movie);
+        detailsFragment.setArguments(args);
+        return detailsFragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        movie = getArguments().getParcelable("movie");
 
     }
 
@@ -110,21 +121,32 @@ public class MovieDetailsActivityFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        final View rootView = inflater.inflate(R.layout.fragment_movie_detalis, container, false);
-        Intent intent = getActivity().getIntent();
+        final View rootView = inflater.inflate(R.layout.fragment_movie_details, container, false);
 
-        //get movie object and parse it
-        if (intent.hasExtra(getString(R.string.movie_details_extra_key))) {
-            movie = intent.getParcelableExtra(getString(R.string.movie_details_extra_key));
+        toolbar = (Toolbar) rootView.findViewById(R.id.toolbar_details);
+        if (toolbar!= null){
+            ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+            try {
+                ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }catch (NullPointerException e){
+                e.printStackTrace();
+            }
+        }
 
             isFavorite = Utilities.checkFavorite(movie.getId(),getActivity());
             isLollipop = Utilities.isLollipopandAbove();
 
             final ImageView blur_poster = (ImageView) rootView.findViewById(R.id.blur_poster);
             ImageView poster = (ImageView) rootView.findViewById(R.id.poster);
+            TextView titleView = (TextView) rootView.findViewById(R.id.movie_title_view);
             TextView releaseDateView = (TextView) rootView.findViewById(R.id.release_date);
             TextView plotView = (TextView) rootView.findViewById(R.id.plot);
             TextView userRatingView = (TextView) rootView.findViewById(R.id.user_rating);
@@ -170,10 +192,17 @@ public class MovieDetailsActivityFragment extends Fragment {
                 Picasso.with(getActivity()).load(posterUri).fit().into(poster);
 
                 String movieTitle = movie.getTitle();
-                if (movieTitle.length()>33){
-                    collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.small_expanded);
+                if (titleView != null){
+                    //TwoPane Mode
+                    titleView.setText(movieTitle);
+                }else {
+                    //SinglePane Mode With CollapsingToolbarLayout
+                    if (movieTitle.length()>33){
+                        collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.small_expanded);
+                    }
+                    collapsingToolbarLayout.setTitle(movieTitle);
                 }
-                collapsingToolbarLayout.setTitle(movieTitle);
+
                 releaseDateView.setText(movie.getReleaseDate());
                 plotView.setText(movie.getPlot());
                 userRatingView.setText(movie.getVoteAverage());
@@ -193,7 +222,7 @@ public class MovieDetailsActivityFragment extends Fragment {
             reviewsListview.setAdapter(reviewAdapter);
 
 
-        }
+//        }
 
 
         return rootView;
@@ -201,7 +230,7 @@ public class MovieDetailsActivityFragment extends Fragment {
 
 
     private void applyPalette(Palette palette,CollapsingToolbarLayout collapsingToolbar){
-        if (palette !=null) {
+        if (palette !=null && toolbar != null) {
             Palette.Swatch vibrantSwatch = palette.getVibrantSwatch();
             if (vibrantSwatch!=null){
                 int actionBarColorRGB = vibrantSwatch.getRgb();

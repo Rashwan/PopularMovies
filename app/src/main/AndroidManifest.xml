@@ -11,7 +11,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".MainActivity"
+            android:name=".BrowseMoviesActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,11 +22,11 @@
         <activity
             android:name=".MovieDetalisActivity"
             android:label="@string/title_activity_movie_detalis"
-            android:parentActivityName="com.example.rashwan.popularmovies.MainActivity" >
+            android:parentActivityName=".BrowseMoviesActivity" >
             <!-- Parent activity meta-data to support API level 7+ -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.rashwan.popularmovies.MainActivity" />
+                android:value=".BrowseMoviesActivity" />
             >
         </activity>
 

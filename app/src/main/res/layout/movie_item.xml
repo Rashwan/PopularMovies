@@ -9,14 +9,13 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="240dp"
-        android:id="@+id/movie_poster"
-        android:transitionName="poster"/>
-
+        android:id="@+id/movie_poster" />
 
     <RelativeLayout
         android:id="@+id/thumb_bottom_view"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
         android:gravity="center_vertical"
         android:animateLayoutChanges="true">
 

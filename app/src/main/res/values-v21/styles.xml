@@ -9,6 +9,13 @@
         <item name="android:textColorSecondary">@color/color_text_secondary</item>
         <item name="android:windowContentTransitions">true</item>
         <item name="android:itemTextAppearance">@style/TextAppearance</item>
+        <item name="android:windowSharedElementReenterTransition">@null</item>
+
+        <!-- specify enter and exit transitions -->
+        <!-- options are: explode, slide, fade -->
+        <!--<item name="android:windowEnterTransition">@android:transition/fade</item>-->
+        <!--<item name="android:windowExitTransition">@android:transition/fade</item>-->
+
 
     </style>
 

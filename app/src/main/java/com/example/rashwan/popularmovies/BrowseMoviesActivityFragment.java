@@ -1,16 +1,13 @@
 package com.example.rashwan.popularmovies;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -40,13 +38,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A placeholder fragment containing a simple view.
- */
-public class MainActivityFragment extends Fragment {
+
+public class BrowseMoviesActivityFragment extends Fragment {
     private String popularMoviesURL;
     private String topRatedMoviesURL;
-    private ImageAdapter adapter;
+    private BrowseMoviesAdapter adapter;
     private GridView gridView;
     private LinearLayout offlineView;
     private SharedPreferences menu_sp ;
@@ -57,8 +53,25 @@ public class MainActivityFragment extends Fragment {
     private String modePopular;
     private String modeTopRated;
     private String modeFavorites;
+    private OnItemSelectedListener listener;
 
-    public MainActivityFragment() {
+    public interface OnItemSelectedListener {
+        void onItemSelected(Movie movie,ImageView posterView);
+    }
+
+
+    public BrowseMoviesActivityFragment() {
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        if (activity instanceof OnItemSelectedListener){
+            listener = (OnItemSelectedListener) activity;
+        } else {
+        throw new ClassCastException(activity.toString()
+                + " must implement ItemsListFragment.OnItemSelectedListener");
+        }
     }
 
     @Override
@@ -101,9 +114,6 @@ public class MainActivityFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         jsonResponse = new JSONArray();
         scrollPage = 1;
         sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
@@ -115,7 +125,7 @@ public class MainActivityFragment extends Fragment {
 
             case R.id.action_sort_popular :
                 item.setChecked(true);
-                adapter = new ImageAdapter(getActivity(), new ArrayList<Movie>());
+                adapter = new BrowseMoviesAdapter(getActivity(), new ArrayList<Movie>());
                 editor.putString(getString(R.string.sort_mode_key), modePopular);
 
                 if (Utilities.checkConnectivity(getActivity())){
@@ -131,7 +141,7 @@ public class MainActivityFragment extends Fragment {
 
             case R.id.action_sort_top_rated:
                 item.setChecked(true);
-                adapter = new ImageAdapter(getActivity(), new ArrayList<Movie>());
+                adapter = new BrowseMoviesAdapter(getActivity(), new ArrayList<Movie>());
                 editor.putString(getString(R.string.sort_mode_key), modeTopRated);
                 if (Utilities.checkConnectivity(getActivity())) {
                     if ((sort_pref.equals(modePopular)) || (sort_pref.equals(modeFavorites))) {
@@ -146,12 +156,10 @@ public class MainActivityFragment extends Fragment {
 
             case R.id.action_favorite:
                 item.setChecked(true);
-                adapter = new ImageAdapter(getActivity(), new ArrayList<Movie>());
-                if ((sort_pref.equals(modePopular))|| (sort_pref.equals(modeTopRated))) {
-                    editor.putString(getString(R.string.sort_mode_key), modeFavorites);
-                    editor.commit();
-                    getFavorites();
-                }
+                adapter = new BrowseMoviesAdapter(getActivity(), new ArrayList<Movie>());
+                editor.putString(getString(R.string.sort_mode_key), modeFavorites);
+                editor.commit();
+                getFavorites();
                 return true;
         }
 
@@ -162,27 +170,22 @@ public class MainActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar_main);
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
-        activity.setSupportActionBar(toolbar);
+        View rootView = inflater.inflate(R.layout.fragment_browse, container, false);
 
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         offlineView  = (LinearLayout) rootView.findViewById(R.id.offline_view);
 
-        adapter = new ImageAdapter(getActivity(),new ArrayList<Movie>());
+        adapter = new BrowseMoviesAdapter(getActivity(),new ArrayList<Movie>());
 
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        gridView.setOnItemClickListener(new OnItemClickListener() {
+            @SuppressLint("NewApi")
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
-                Intent detailsIntent = new Intent(getActivity(),MovieDetalisActivity.class);
                 ImageView gridPoster = (ImageView) view.findViewById(R.id.movie_poster);
-
-                ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation
-                        (getActivity(),gridPoster,"poster");
-
+                if (Utilities.isLollipopandAbove()){
+                    gridPoster.setTransitionName("poster");
+                }
                 Movie movie = null;
                 if (!sort_pref.equals(modeFavorites)) {
                     try {
@@ -194,15 +197,10 @@ public class MainActivityFragment extends Fragment {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    Log.e("ItemClickNOtFavotites",movie.getBlurPosterUri().toString());
                 }else{
                     movie = (Movie) adapter.getItem(position);
-                    Log.e("ItemClickFavotites",movie.getBlurPosterUri().toString());
                 }
-
-               detailsIntent.putExtra(getString(R.string.movie_details_extra_key),movie);
-
-                ActivityCompat.startActivity(getActivity(),detailsIntent,optionsCompat.toBundle());
+                listener.onItemSelected(movie,gridPoster);
             }
         });
         gridView.setOnScrollListener(new EndlessScrollListener(5, 1) {
@@ -377,5 +375,12 @@ public class MainActivityFragment extends Fragment {
         }
     }
 
+    public void setActivateOnItemClick(boolean activateOnItemClick) {
+        // When setting CHOICE_MODE_SINGLE, GridView will automatically
+        // give items the 'activated' state when touched.
+        gridView.setChoiceMode(
+                activateOnItemClick ? GridView.CHOICE_MODE_SINGLE
+                        : GridView.CHOICE_MODE_NONE);
+    }
 }
 
