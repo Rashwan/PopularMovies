@@ -224,9 +224,18 @@ public class MovieDetailsActivityFragment extends Fragment {
                     titleView.setText(movieTitle);
                 }else {
                     //SinglePane Mode With CollapsingToolbarLayout
-                    if (movieTitle.length()>33){
-                        collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.small_expanded);
+                    if (Utilities.getDeviceSW(getContext())>=600){
+                        if (movieTitle.length()>33){
+                            collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.small_expanded);
+                            collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.small_collapsed);
+                        }
+                    }else {
+                        if (movieTitle.length()>15){
+                            collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.small_expanded);
+                            collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.small_collapsed);
+                        }
                     }
+
                     collapsingToolbarLayout.setTitle(movieTitle);
                 }
 

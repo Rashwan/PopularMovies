@@ -195,5 +195,8 @@ public class Utilities {
             item.setChecked(true);
         }
     }
+    public static int getDeviceSW(Context context){
+        return context.getResources().getConfiguration().smallestScreenWidthDp;
+    }
 
 }
