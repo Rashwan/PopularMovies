@@ -56,7 +56,7 @@ public class BrowseMoviesActivityFragment extends Fragment {
     private OnItemSelectedListener listener;
 
     public interface OnItemSelectedListener {
-        void onItemSelected(Movie movie,ImageView posterView);
+        void onItemSelected(Movie movie,ImageView posterView,int position);
     }
 
 
@@ -184,7 +184,7 @@ public class BrowseMoviesActivityFragment extends Fragment {
                 sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
                 ImageView gridPoster = (ImageView) view.findViewById(R.id.movie_poster);
                 if (Utilities.isLollipopandAbove()){
-                    gridPoster.setTransitionName("poster");
+                    gridPoster.setTransitionName("poster" + position);
                 }
                 Movie movie = null;
                 if (!sort_pref.equals(modeFavorites)) {
@@ -200,7 +200,7 @@ public class BrowseMoviesActivityFragment extends Fragment {
                 }else{
                     movie = (Movie) adapter.getItem(position);
                 }
-                listener.onItemSelected(movie,gridPoster);
+                listener.onItemSelected(movie,gridPoster,position);
             }
         });
         gridView.setOnScrollListener(new EndlessScrollListener(5, 1) {

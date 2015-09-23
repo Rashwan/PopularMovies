@@ -22,7 +22,6 @@ import java.util.List;
 public class BrowseMoviesAdapter extends BaseAdapter {
     private Context mContext;
     private List<Movie> mMovies = new ArrayList<>();
-    public static final String BASE_URL = "http://image.tmdb.org/t/p/w185/";
     boolean isConnected ;
 
     public BrowseMoviesAdapter(Context context, List<Movie> movies) {

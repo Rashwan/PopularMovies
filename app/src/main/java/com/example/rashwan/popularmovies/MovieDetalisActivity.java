@@ -8,10 +8,12 @@ public class MovieDetalisActivity extends AppCompatActivity{
     MovieDetailsActivityFragment detailsFragment;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(null);
         setContentView(R.layout.activity_movie_detalis);
+        postponeEnterTransition();
         Movie movie = getIntent().getParcelableExtra(getString(R.string.movie_details_extra_key));
-        detailsFragment = MovieDetailsActivityFragment.newInstance(movie);
+        String transitionName = getIntent().getStringExtra("transition");
+        detailsFragment = MovieDetailsActivityFragment.newInstance(movie,transitionName);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.movie_detail_container,detailsFragment);
         ft.commit();
@@ -23,4 +25,5 @@ public class MovieDetalisActivity extends AppCompatActivity{
         super.onStop();
         supportFinishAfterTransition();
     }
+
 }

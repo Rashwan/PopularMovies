@@ -1,6 +1,6 @@
 package com.example.rashwan.popularmovies;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -21,6 +21,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -30,6 +31,7 @@ import android.widget.TextView;
 
 import com.github.florent37.picassopalette.BitmapPalette;
 import com.github.florent37.picassopalette.PicassoPalette;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -58,18 +60,21 @@ public class MovieDetailsActivityFragment extends Fragment {
     Boolean isFavorite;
     Boolean isLollipop;
     Toolbar toolbar;
+    String transitionName;
 
 
     private static final String TRAILER_BASE_URL ="http://api.themoviedb.org/3/movie/%s/videos";
     private static final String REVIEW_BASE_URL = "http://api.themoviedb.org/3/movie/%s/reviews";
 
     public MovieDetailsActivityFragment() {
+
     }
 
-    public static MovieDetailsActivityFragment newInstance(Movie movie) {
+    public static MovieDetailsActivityFragment newInstance(Movie movie,String transitionName) {
         MovieDetailsActivityFragment detailsFragment = new MovieDetailsActivityFragment();
         Bundle args = new Bundle();
-        args.putParcelable("movie",movie);
+        args.putParcelable("movie", movie);
+        args.putString("transition", transitionName);
         detailsFragment.setArguments(args);
         return detailsFragment;
     }
@@ -78,8 +83,8 @@ public class MovieDetailsActivityFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-
         movie = getArguments().getParcelable("movie");
+        transitionName = getArguments().getString("transition");
 
     }
 
@@ -94,6 +99,10 @@ public class MovieDetailsActivityFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
+            case android.R.id.home:
+                super.onStop();
+                getActivity().supportFinishAfterTransition();
+                return true;
             case R.id.menu_share:
                 List<Trailer> trailerList = movie.getTrailers();
                 if (!trailerList.isEmpty()) {
@@ -120,11 +129,7 @@ public class MovieDetailsActivityFragment extends Fragment {
 
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-    }
-
+    @SuppressLint("NewApi")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -132,6 +137,7 @@ public class MovieDetailsActivityFragment extends Fragment {
         final View rootView = inflater.inflate(R.layout.fragment_movie_details, container, false);
 
         toolbar = (Toolbar) rootView.findViewById(R.id.toolbar_details);
+        //onePane Mode
         if (toolbar!= null){
             ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
             try {
@@ -145,7 +151,9 @@ public class MovieDetailsActivityFragment extends Fragment {
             isLollipop = Utilities.isLollipopandAbove();
 
             final ImageView blur_poster = (ImageView) rootView.findViewById(R.id.blur_poster);
-            ImageView poster = (ImageView) rootView.findViewById(R.id.poster);
+            final ImageView poster = (ImageView) rootView.findViewById(R.id.poster);
+
+            poster.setTransitionName(transitionName);
             TextView titleView = (TextView) rootView.findViewById(R.id.movie_title_view);
             TextView releaseDateView = (TextView) rootView.findViewById(R.id.release_date);
             TextView plotView = (TextView) rootView.findViewById(R.id.plot);
@@ -157,7 +165,7 @@ public class MovieDetailsActivityFragment extends Fragment {
             dividers = rootView.findViewById(R.id.reviews_divider);
             FloatingActionButton fabFavorite = (FloatingActionButton) rootView.findViewById(R.id.fab_favorite);
             final CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsingToolbarLayout);
-            Utilities.updateHeartButton(fabFavorite,isLollipop,isFavorite);
+        Utilities.updateHeartButton(fabFavorite,isLollipop,isFavorite);
 
             fabFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -185,11 +193,30 @@ public class MovieDetailsActivityFragment extends Fragment {
                                         blur_poster.setImageBitmap(Utilities.blurRenderScript(bitmap, 18, getActivity()));
 
                                         //Apply Palette  Effect
-                                        applyPalette(palette,collapsingToolbarLayout);
+                                        applyPalette(palette, collapsingToolbarLayout);
                                     }
                                 }));
                 Uri posterUri = movie.getPosterUri();
-                Picasso.with(getActivity()).load(posterUri).fit().into(poster);
+
+                Picasso.with(getActivity()).load(posterUri).fit().into(poster, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        poster.getViewTreeObserver().addOnPreDrawListener(
+                                new ViewTreeObserver.OnPreDrawListener() {
+                                    @Override
+                                    public boolean onPreDraw() {
+                                            poster.getViewTreeObserver().removeOnPreDrawListener(this);
+                                            getActivity().startPostponedEnterTransition();
+                                            return true;
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void onError() {
+
+                    }
+                });
 
                 String movieTitle = movie.getTitle();
                 if (titleView != null){

@@ -5,12 +5,13 @@
     <FrameLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_height="match_parent"
-        android:layout_width="match_parent">
+        android:layout_width="match_parent"
+        android:clipChildren="false">
 
         <GridView xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/gridview"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:columnWidth="145dp"
                 android:numColumns="auto_fit"
                 android:verticalSpacing="10dp"

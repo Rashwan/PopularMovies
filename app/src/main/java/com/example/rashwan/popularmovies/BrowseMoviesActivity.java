@@ -15,7 +15,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 public class BrowseMoviesActivity extends AppCompatActivity implements BrowseMoviesActivityFragment.OnItemSelectedListener{
-    Boolean isTwoPane = false;
+    private Boolean isTwoPane = false;
+    private int selectedItem;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,27 +49,28 @@ public class BrowseMoviesActivity extends AppCompatActivity implements BrowseMov
 
     @SuppressLint("NewApi")
     @Override
-    public void onItemSelected(Movie movie,ImageView posterView) {
+    public void onItemSelected(Movie movie,ImageView posterView,int position) {
         if (isTwoPane){
+            if (selectedItem != position){
+                selectedItem = position;
+                MovieDetailsActivityFragment detailsFragment = MovieDetailsActivityFragment.newInstance(movie,posterView.getTransitionName());
+                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 
-            MovieDetailsActivityFragment detailsFragment = MovieDetailsActivityFragment.newInstance(movie);
-            BrowseMoviesActivityFragment browseFragment = new BrowseMoviesActivityFragment();
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                if (Utilities.isLollipopandAbove()){
+                    detailsFragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_left));
+                    ft.replace(R.id.movie_detail_container,detailsFragment).addSharedElement(posterView,posterView.getTransitionName()).commit();
 
-            if (Utilities.isLollipopandAbove()){
-                browseFragment.setSharedElementReturnTransition(TransitionInflater.from(this).inflateTransition(R.transition.change_image_transform));
-                detailsFragment.setSharedElementEnterTransition(TransitionInflater.from(this).inflateTransition(R.transition.change_image_transform));
-                ft.replace(R.id.movie_detail_container,detailsFragment).addSharedElement(posterView,"poster").commit();
-
-            }else {
-                ft.replace(R.id.movie_detail_container,detailsFragment).commit();
+                }else {
+                    ft.replace(R.id.movie_detail_container,detailsFragment).commit();
+                }
             }
         }else {
 
             ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation
-                    (this, posterView, "poster");
+                    (this, posterView,posterView.getTransitionName());
             Intent detailsIntent = new Intent(this, MovieDetalisActivity.class);
             detailsIntent.putExtra(getString(R.string.movie_details_extra_key), movie);
+            detailsIntent.putExtra("transition",posterView.getTransitionName());
             ActivityCompat.startActivity(this, detailsIntent, optionsCompat.toBundle());
         }
     }
@@ -84,10 +86,4 @@ public class BrowseMoviesActivity extends AppCompatActivity implements BrowseMov
         }
     }
 
-//    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-//    @Override
-//    public void onActivityReenter(int resultCode, Intent data) {
-//        super.onActivityReenter(resultCode, data);
-//        postponeEnterTransition();
-//    }
 }
