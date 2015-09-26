@@ -121,38 +121,30 @@ public class Utilities {
         activity.startActivity(Intent.createChooser(builder.getIntent(), activity.getString(R.string.share_chooser_title)));
     }
 
-    public static void updateHeartButton(final FloatingActionButton fab, Boolean isLollipop, final Boolean isFavorite) {
-        if (isLollipop) {
-            AnimatorSet animatorSet = new AnimatorSet();
+    public static void updateHeartButton(final FloatingActionButton fab,final Boolean isFavorite) {
+        AnimatorSet animatorSet = new AnimatorSet();
 
-            ObjectAnimator bounceAnimX = ObjectAnimator.ofFloat(fab, "scaleX", 0.2f, 1f);
-            bounceAnimX.setDuration(300);
-            bounceAnimX.setInterpolator(new OvershootInterpolator(4));
+        ObjectAnimator bounceAnimX = ObjectAnimator.ofFloat(fab, "scaleX", 0.2f, 1f);
+        bounceAnimX.setDuration(300);
+        bounceAnimX.setInterpolator(new OvershootInterpolator(4));
 
-            ObjectAnimator bounceAnimY = ObjectAnimator.ofFloat(fab, "scaleY", 0.2f, 1f);
-            bounceAnimY.setDuration(300);
-            bounceAnimY.setInterpolator(new OvershootInterpolator(4));
-            bounceAnimY.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    if (isFavorite) {
-                        fab.setImageResource(R.drawable.ic_heart_red_filled);
-                    } else {
-                        fab.setImageResource(R.drawable.ic_heart_outline_red);
-                    }
+        ObjectAnimator bounceAnimY = ObjectAnimator.ofFloat(fab, "scaleY", 0.2f, 1f);
+        bounceAnimY.setDuration(300);
+        bounceAnimY.setInterpolator(new OvershootInterpolator(4));
+        bounceAnimY.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                if (isFavorite) {
+                    fab.setImageResource(R.drawable.ic_heart_red_filled);
+                } else {
+                    fab.setImageResource(R.drawable.ic_heart_outline_red);
                 }
-            });
-
-            animatorSet.play(bounceAnimX).with(bounceAnimY);
-
-            animatorSet.start();
-        } else {
-            if (isFavorite) {
-                fab.setImageResource(R.drawable.ic_heart_outline_red);
-            }else{
-                fab.setImageResource(R.drawable.ic_heart_red_filled);
             }
-        }
+        });
+
+        animatorSet.play(bounceAnimX).with(bounceAnimY);
+
+        animatorSet.start();
     }
 
     public static Uri movieLiked(Movie movie,Context context){

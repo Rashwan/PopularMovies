@@ -16,7 +16,7 @@ import android.widget.ImageView;
 
 public class BrowseMoviesActivity extends AppCompatActivity implements BrowseMoviesActivityFragment.OnItemSelectedListener{
     private Boolean isTwoPane = false;
-    private int selectedItem;
+    private int selectedItem = -1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,29 +49,35 @@ public class BrowseMoviesActivity extends AppCompatActivity implements BrowseMov
 
     @SuppressLint("NewApi")
     @Override
-    public void onItemSelected(Movie movie,ImageView posterView,int position) {
+    public void onItemSelected(Movie movie,ImageView posterView) {
         if (isTwoPane){
-            if (selectedItem != position){
-                selectedItem = position;
-                MovieDetailsActivityFragment detailsFragment = MovieDetailsActivityFragment.newInstance(movie,posterView.getTransitionName());
+            if (selectedItem != Integer.valueOf(movie.getId())){
+                selectedItem = Integer.valueOf(movie.getId());
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 
                 if (Utilities.isLollipopandAbove()){
+                    MovieDetailsActivityFragment detailsFragment = MovieDetailsActivityFragment.newInstance(movie,posterView.getTransitionName());
                     detailsFragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_left));
                     ft.replace(R.id.movie_detail_container,detailsFragment).addSharedElement(posterView,posterView.getTransitionName()).commit();
 
                 }else {
+                    MovieDetailsActivityFragment detailsFragment = MovieDetailsActivityFragment.newInstance(movie,null);
                     ft.replace(R.id.movie_detail_container,detailsFragment).commit();
                 }
             }
         }else {
 
-            ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation
-                    (this, posterView,posterView.getTransitionName());
             Intent detailsIntent = new Intent(this, MovieDetalisActivity.class);
             detailsIntent.putExtra(getString(R.string.movie_details_extra_key), movie);
-            detailsIntent.putExtra("transition",posterView.getTransitionName());
-            ActivityCompat.startActivity(this, detailsIntent, optionsCompat.toBundle());
+            if (Utilities.isLollipopandAbove()){
+                ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation
+                        (this, posterView,posterView.getTransitionName());
+                detailsIntent.putExtra("transition",posterView.getTransitionName());
+                ActivityCompat.startActivity(this, detailsIntent, optionsCompat.toBundle());
+            }else {
+                startActivity(detailsIntent);
+            }
+
         }
     }
 

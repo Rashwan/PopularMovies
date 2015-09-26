@@ -74,7 +74,9 @@ public class MovieDetailsActivityFragment extends Fragment {
         MovieDetailsActivityFragment detailsFragment = new MovieDetailsActivityFragment();
         Bundle args = new Bundle();
         args.putParcelable("movie", movie);
-        args.putString("transition", transitionName);
+        if (transitionName !=null){
+            args.putString("transition", transitionName);
+        }
         detailsFragment.setArguments(args);
         return detailsFragment;
     }
@@ -84,7 +86,9 @@ public class MovieDetailsActivityFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         movie = getArguments().getParcelable("movie");
-        transitionName = getArguments().getString("transition");
+        if (getArguments().containsKey("transition")){
+            transitionName = getArguments().getString("transition");
+        }
 
     }
 
@@ -137,8 +141,9 @@ public class MovieDetailsActivityFragment extends Fragment {
         final View rootView = inflater.inflate(R.layout.fragment_movie_details, container, false);
 
         toolbar = (Toolbar) rootView.findViewById(R.id.toolbar_details);
-        //onePane Mode
+
         if (toolbar!= null){
+            //onePane Mode
             ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
             try {
                 ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -147,25 +152,26 @@ public class MovieDetailsActivityFragment extends Fragment {
             }
         }
 
-            isFavorite = Utilities.checkFavorite(movie.getId(),getActivity());
-            isLollipop = Utilities.isLollipopandAbove();
+        isFavorite = Utilities.checkFavorite(movie.getId(),getActivity());
+        isLollipop = Utilities.isLollipopandAbove();
 
-            final ImageView blur_poster = (ImageView) rootView.findViewById(R.id.blur_poster);
-            final ImageView poster = (ImageView) rootView.findViewById(R.id.poster);
-
+        final ImageView blur_poster = (ImageView) rootView.findViewById(R.id.blur_poster);
+        final ImageView poster = (ImageView) rootView.findViewById(R.id.poster);
+        if (transitionName!=null){
             poster.setTransitionName(transitionName);
-            TextView titleView = (TextView) rootView.findViewById(R.id.movie_title_view);
-            TextView releaseDateView = (TextView) rootView.findViewById(R.id.release_date);
-            TextView plotView = (TextView) rootView.findViewById(R.id.plot);
-            TextView userRatingView = (TextView) rootView.findViewById(R.id.user_rating);
-            trailersListview = (ListView) rootView.findViewById(R.id.trailers_list_view);
-            reviewsListview = (ListView) rootView.findViewById(R.id.reviews_list_view);
-            trailersHeader = (TextView) rootView.findViewById(R.id.trailers_header);
-            reviewsHeader = (TextView) rootView.findViewById(R.id.reviews_header);
-            dividers = rootView.findViewById(R.id.reviews_divider);
-            FloatingActionButton fabFavorite = (FloatingActionButton) rootView.findViewById(R.id.fab_favorite);
-            final CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsingToolbarLayout);
-        Utilities.updateHeartButton(fabFavorite,isLollipop,isFavorite);
+        }
+        TextView titleView = (TextView) rootView.findViewById(R.id.movie_title_view);
+        TextView releaseDateView = (TextView) rootView.findViewById(R.id.release_date);
+        TextView plotView = (TextView) rootView.findViewById(R.id.plot);
+        TextView userRatingView = (TextView) rootView.findViewById(R.id.user_rating);
+        trailersListview = (ListView) rootView.findViewById(R.id.trailers_list_view);
+        reviewsListview = (ListView) rootView.findViewById(R.id.reviews_list_view);
+        trailersHeader = (TextView) rootView.findViewById(R.id.trailers_header);
+        reviewsHeader = (TextView) rootView.findViewById(R.id.reviews_header);
+        dividers = rootView.findViewById(R.id.reviews_divider);
+        FloatingActionButton fabFavorite = (FloatingActionButton) rootView.findViewById(R.id.fab_favorite);
+        final CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsingToolbarLayout);
+        Utilities.updateHeartButton(fabFavorite,isFavorite);
 
             fabFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -176,7 +182,7 @@ public class MovieDetailsActivityFragment extends Fragment {
                         Utilities.movieLiked(movie, getActivity());
                     }
                     isFavorite = Utilities.checkFavorite(movie.getId(),getActivity());
-                    Utilities.updateHeartButton((FloatingActionButton) v,isLollipop,isFavorite);
+                    Utilities.updateHeartButton((FloatingActionButton) v,isFavorite);
                 }
             });
             if (movie != null) {
@@ -205,9 +211,12 @@ public class MovieDetailsActivityFragment extends Fragment {
                                 new ViewTreeObserver.OnPreDrawListener() {
                                     @Override
                                     public boolean onPreDraw() {
+                                        if (isLollipop) {
                                             poster.getViewTreeObserver().removeOnPreDrawListener(this);
                                             getActivity().startPostponedEnterTransition();
-                                            return true;
+                                        }
+                                        return true;
+
                                     }
                                 });
                     }

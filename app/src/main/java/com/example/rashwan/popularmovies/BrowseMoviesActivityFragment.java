@@ -56,7 +56,7 @@ public class BrowseMoviesActivityFragment extends Fragment {
     private OnItemSelectedListener listener;
 
     public interface OnItemSelectedListener {
-        void onItemSelected(Movie movie,ImageView posterView,int position);
+        void onItemSelected(Movie movie,ImageView posterView);
     }
 
 
@@ -200,7 +200,7 @@ public class BrowseMoviesActivityFragment extends Fragment {
                 }else{
                     movie = (Movie) adapter.getItem(position);
                 }
-                listener.onItemSelected(movie,gridPoster,position);
+                listener.onItemSelected(movie,gridPoster);
             }
         });
         gridView.setOnScrollListener(new EndlessScrollListener(5, 1) {
