@@ -34,9 +34,8 @@
                 android:alpha="0.3" />
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar_details"
-                android:minHeight="?attr/actionBarSize"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
+                android:layout_height="56dp"
                 app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                 app:layout_collapseMode="pin" />
@@ -47,7 +46,11 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:id="@+id/scrollView"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -57,68 +60,93 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="310dp"
+                android:minHeight="270dp"
                 android:orientation="horizontal"
-                android:padding="10dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
                 android:baselineAligned="false">
                 <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent">
                     <ImageView
                         android:layout_width="wrap_content"
-                        android:minWidth="220dp"
-                        android:layout_height="fill_parent"
+                        android:minWidth="160dp"
+                        android:layout_height="match_parent"
                         android:layout_gravity="center_horizontal"
                         android:id="@+id/poster"
                         android:transitionName="poster"/>
                 </FrameLayout>
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:padding="5dp"
-                    android:gravity="center_vertical">
+                    android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/release_date_title"
+                            android:textAppearance="@style/title_text"
+                            android:textColor="@color/color_primary_dark"
+                            android:paddingBottom="6dp"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="MAY 1993"
+                            android:id="@+id/release_date_formatted"
+                            android:textAppearance="@style/body_bold_text"
+                            android:layout_gravity="center"/>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/vote_average_title"
+                            android:textAppearance="@style/title_text"
+                            android:textColor="@color/color_primary_dark"
+                            android:paddingBottom="6dp"
+                            />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="UserRating"
+                            android:id="@+id/user_rating"
+                            android:textAppearance="@style/body_bold_text"
+                            android:textSize="16sp"
+                            android:layout_gravity="center" />
+                    </LinearLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="ReleaseDate"
-                        android:id="@+id/release_date"
-                        android:layout_gravity="center_horizontal"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
-                        android:padding="5dp"
-                        />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="UserRating"
-                        android:id="@+id/user_rating"
-                        android:layout_gravity="center_horizontal"
-                        android:textAppearance="?android:textAppearanceLarge"/>
 
                 </LinearLayout>
             </LinearLayout>
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
+                android:layout_height="1dp"
                 android:background="?android:attr/listDivider"
                 android:padding="3dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_height="wrap_content"
                 android:text="Plot"
                 android:id="@+id/plot"
-                android:textAppearance="?android:textAppearanceMedium"
-                android:padding="10dp"
+                android:textAppearance="@style/body_text"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
                 />
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
+                android:layout_height="1dp"
                 android:background="?android:attr/listDivider"
                 android:padding="3dp"
                 android:id="@+id/reviews_divider"
@@ -127,34 +155,33 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textSize="25sp"
+                android:textAppearance="@style/title_text"
                 android:text="Trailers"
-                android:padding="5dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
                 android:textColor="@color/color_primary_dark"
-                android:textStyle="bold"
                 android:visibility="gone"
                 android:id="@+id/trailers_header"/>
             <ListView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/trailers_list_view"
-                android:padding="5dp">
+                android:divider="@null"
+                android:paddingTop="3dp"
+                android:paddingBottom="8dp">
             </ListView>
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
+                android:layout_height="1dp"
                 android:background="?android:attr/listDivider"
                 android:padding="3dp" />
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textSize="25sp"
+                android:textAppearance="@style/title_text"
                 android:text="Reviews"
-                android:padding="5dp"
+                android:paddingTop="5dp"
                 android:textColor="@color/color_primary_dark"
-                android:textStyle="bold"
                 android:visibility="gone"
                 android:id="@+id/reviews_header" />
             <ListView
@@ -163,7 +190,6 @@
                 android:id="@+id/reviews_list_view"
                 android:divider="?android:attr/listDivider">
             </ListView>
-
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
     <android.support.design.widget.FloatingActionButton

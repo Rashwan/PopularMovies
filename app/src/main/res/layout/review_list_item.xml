@@ -3,12 +3,12 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="5dp"
-    android:paddingBottom="5dp">
+    android:paddingBottom="20dp"
+    android:paddingTop="16dp">
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:textAppearanceMedium"
+        android:textAppearance="@style/body_bold_text"
         android:textStyle="bold"
         android:text="Rashwan : "
         android:id="@+id/review_author"
@@ -16,7 +16,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:textAppearanceSmall"
+        android:textAppearance="@style/body_text"
         android:text="Fabulous action movie. Lots of interesting characters. They don't make many movies like this. The whole movie from start to finish was entertaining I'm looking forward to seeing it again. I definitely recommend seeing it."
         android:id="@+id/review_content"/>
 

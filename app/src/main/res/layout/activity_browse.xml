@@ -8,9 +8,10 @@
         android:id="@+id/toolbar_main"
         android:minHeight="?attr/actionBarSize"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:background="?attr/colorPrimary"
-        app:titleTextAppearance="@style/Toolbar.TitleText">
+        app:titleTextAppearance="@style/title_text"
+        android:elevation="4dp">
     </android.support.v7.widget.Toolbar>
     <fragment
         xmlns:tools="http://schemas.android.com/tools"
@@ -18,5 +19,6 @@
         android:name="com.example.rashwan.popularmovies.BrowseMoviesActivityFragment"
         tools:layout="@layout/fragment_browse"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_marginTop="4dp"/>
 </LinearLayout>

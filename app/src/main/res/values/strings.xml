@@ -22,4 +22,7 @@
     <string name="pref_favorites_title">Favorites</string>
     <string name="share_text">Watch <xliff:g id="title">%1$s</xliff:g> Trailer At <xliff:g id="trailerurl">%2$s</xliff:g></string>
     <string name="share_chooser_title">Share Movie Trailer</string>
+    <string name="vote_average_title">Vote Average : </string>
+    <string name="vote_average"><xliff:g id="vote">%1$s</xliff:g> / 10</string>
+    <string name="release_date_title">Release Date : </string>
 </resources>

@@ -9,9 +9,11 @@
         android:id="@+id/toolbar_main"
         android:minHeight="?attr/actionBarSize"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="64dp"
         android:background="?attr/colorPrimary"
-        app:titleTextAppearance="@style/Toolbar.TitleText">
+        app:titleTextAppearance="@style/title_text"
+        android:elevation="4dp">
+
     </android.support.v7.widget.Toolbar>
 
     <LinearLayout
@@ -21,7 +23,8 @@
         android:baselineAligned="false"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:paddingTop="4dp">
         <fragment xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:tools="http://schemas.android.com/tools"
             android:id="@+id/browse_fragment"

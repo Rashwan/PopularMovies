@@ -4,24 +4,21 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:minHeight="80dp">
-    <FrameLayout
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="match_parent">
-        <ImageView
-            android:paddingLeft="10dp"
-            android:layout_width="wrap_content"
-            android:minWidth="100dp"
-            android:layout_height="fill_parent"
-            android:id="@+id/youtube_thumbnail" />
-    </FrameLayout>
+    android:minHeight="48dp"
+    android:paddingBottom="4dp">
+    <ImageView
+        android:layout_width="wrap_content"
+        android:minWidth="60dp"
+        android:layout_height="fill_parent"
+        android:id="@+id/youtube_thumbnail" />
+
     <TextView
         android:layout_width="0dp"
-        android:layout_weight="2"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textAppearance="@style/body_text"
         android:id="@+id/trailer_name"
         android:text="Traile Name"
+        android:paddingLeft="16dp"
         android:layout_gravity="center"/>
 </LinearLayout>

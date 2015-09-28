@@ -161,7 +161,7 @@ public class MovieDetailsActivityFragment extends Fragment {
             poster.setTransitionName(transitionName);
         }
         TextView titleView = (TextView) rootView.findViewById(R.id.movie_title_view);
-        TextView releaseDateView = (TextView) rootView.findViewById(R.id.release_date);
+        TextView releaseDateView = (TextView) rootView.findViewById(R.id.release_date_formatted);
         TextView plotView = (TextView) rootView.findViewById(R.id.plot);
         TextView userRatingView = (TextView) rootView.findViewById(R.id.user_rating);
         trailersListview = (ListView) rootView.findViewById(R.id.trailers_list_view);
@@ -239,7 +239,7 @@ public class MovieDetailsActivityFragment extends Fragment {
                             collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.small_collapsed);
                         }
                     }else {
-                        if (movieTitle.length()>15){
+                        if (movieTitle.length()>1){
                             collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.small_expanded);
                             collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.small_collapsed);
                         }
@@ -248,9 +248,9 @@ public class MovieDetailsActivityFragment extends Fragment {
                     collapsingToolbarLayout.setTitle(movieTitle);
                 }
 
-                releaseDateView.setText(movie.getReleaseDate());
+                releaseDateView.setText(Utilities.getFormattedDate(movie.getReleaseDate()));
+                userRatingView.setText(getString((R.string.vote_average), movie.getVoteAverage()));
                 plotView.setText(movie.getPlot());
-                userRatingView.setText(movie.getVoteAverage());
             }
             trailerAdapter = new TrailerAdapter(getActivity(), new ArrayList<Trailer>());
             trailersListview.setAdapter(trailerAdapter);

@@ -18,6 +18,7 @@ import android.support.v8.renderscript.Allocation;
 import android.support.v8.renderscript.Element;
 import android.support.v8.renderscript.RenderScript;
 import android.support.v8.renderscript.ScriptIntrinsicBlur;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,6 +31,12 @@ import com.example.rashwan.popularmovies.provider.movie.MovieColumns;
 import com.example.rashwan.popularmovies.provider.movie.MovieContentValues;
 import com.example.rashwan.popularmovies.provider.movie.MovieCursor;
 import com.example.rashwan.popularmovies.provider.movie.MovieSelection;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by rashwan on 9/13/15.
@@ -190,5 +197,30 @@ public class Utilities {
     public static int getDeviceSW(Context context){
         return context.getResources().getConfiguration().smallestScreenWidthDp;
     }
+    public static String getFormattedDate(String releaseDate){
+        Date date ;
+        Calendar cal1 ;
+        String monthString;
 
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            date = dateFormat.parse(releaseDate);
+            cal1 = Calendar.getInstance();
+            cal1.setTime(date);
+
+            Calendar cal2= Calendar.getInstance();
+            cal2.set(Calendar.MONTH, cal1.get(Calendar.MONTH));
+            cal2.set(Calendar.YEAR,cal1.get(Calendar.YEAR));
+
+            SimpleDateFormat monthFormat = new SimpleDateFormat("MMMM yyyy");
+            monthFormat.setCalendar(cal2);
+
+            monthString = monthFormat.format(cal2.getTime());
+        } catch (ParseException e) {
+            monthString = releaseDate;
+            e.printStackTrace();
+        }
+        Log.e("UTILITIES",monthString);
+        return monthString;
+    }
 }
