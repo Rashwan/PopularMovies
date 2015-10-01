@@ -94,9 +94,8 @@ public class MovieDetailsActivityFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_movie_details_fragment, menu);
-        if (Utilities.checkConnectivity(getActivity())){
-            menu.getItem(0).setVisible(true);
+        if (this.isVisible() && Utilities.checkConnectivity(getActivity())){
+            inflater.inflate(R.menu.menu_movie_details_fragment, menu);
         }
     }
 

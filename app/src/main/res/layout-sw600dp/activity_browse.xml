@@ -24,11 +24,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="4dp">
-        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/browse_fragment"
-            android:name="com.example.rashwan.popularmovies.BrowseMoviesActivityFragment"
-            tools:layout="@layout/fragment_browse"
+        <FrameLayout
+            android:id="@+id/browse_container"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent" />

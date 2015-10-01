@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.transition.TransitionInflater;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
@@ -17,10 +18,20 @@ import android.widget.ImageView;
 public class BrowseMoviesActivity extends AppCompatActivity implements BrowseMoviesActivityFragment.OnItemSelectedListener{
     private Boolean isTwoPane = false;
     private int selectedItem = -1;
+    private static final String TAG_BROWSE_FRAGMENT = "browse_fragment";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_browse);
+        android.app.FragmentManager fm = getFragmentManager();
+        BrowseMoviesActivityFragment browseFragment = (BrowseMoviesActivityFragment) fm.findFragmentByTag(TAG_BROWSE_FRAGMENT);
+        if (savedInstanceState == null){
+            if (browseFragment==null){
+                browseFragment = new BrowseMoviesActivityFragment();
+                fm.beginTransaction().replace(R.id.browse_container, browseFragment).commit();
+            }
+        }
+
         determinePaneLayout();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main);
         setSupportActionBar(toolbar);
@@ -29,6 +40,8 @@ public class BrowseMoviesActivity extends AppCompatActivity implements BrowseMov
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        Log.e("ONCREATEOPTIONSMENU","TRAA");
+        menu.clear();
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -81,14 +94,11 @@ public class BrowseMoviesActivity extends AppCompatActivity implements BrowseMov
         }
     }
 
+
     private void determinePaneLayout() {
         FrameLayout container = (FrameLayout) findViewById(R.id.movie_detail_container);
         if(container!=null){
             isTwoPane = true;
-            BrowseMoviesActivityFragment browseFragment = (BrowseMoviesActivityFragment)
-                    getSupportFragmentManager().findFragmentById(R.id.browse_fragment);
-            browseFragment.setActivateOnItemClick(true);
-
         }
     }
 

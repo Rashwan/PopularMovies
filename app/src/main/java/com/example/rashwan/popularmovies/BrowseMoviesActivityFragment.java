@@ -5,9 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,18 +26,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class BrowseMoviesActivityFragment extends Fragment {
+public class BrowseMoviesActivityFragment extends android.app.Fragment implements android.app.LoaderManager.LoaderCallbacks<List<Movie>> {
     private String popularMoviesURL;
     private String topRatedMoviesURL;
     private BrowseMoviesAdapter adapter;
@@ -54,6 +45,53 @@ public class BrowseMoviesActivityFragment extends Fragment {
     private String modeTopRated;
     private String modeFavorites;
     private OnItemSelectedListener listener;
+    private static final int LOADER_ID = 1;
+    Context mContext;
+    private Bundle args = new Bundle();
+    private String[] params;
+
+    @Override
+    public android.content.Loader<List<Movie>> onCreateLoader(int id, Bundle args) {
+        Log.e("ONCREATELOADER","QE");
+        return new FetchMoviesAsync(mContext,args);
+    }
+
+    @Override
+    public void onLoadFinished(android.content.Loader<List<Movie>> loader, List<Movie> data) {
+        Log.e("ONLOADFINISHED","ASD");
+        FetchMoviesAsync f = (FetchMoviesAsync) loader;
+        if (data != null) {
+            if (adapter.isEmpty()){
+                Log.e("ONLOADFINISHED", "ADAPTERISEMPTY");
+                if (jsonResponse.length()==0){
+                    adapter.add(data);
+                    gridView.setAdapter(adapter);
+                }else {
+                    Log.e("JSONRESONSE","HASITEMS");
+                    try {
+                        adapter.add(f.getMoviesfromJson(jsonResponse));
+                        gridView.setAdapter(adapter);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }else {
+                adapter.add(data);
+                adapter.notifyDataSetChanged();
+            }
+
+            Log.e("OURRESONSE",String.valueOf(f.getJsonResponse().length()));
+            jsonResponse = f.getJsonResponse();
+        }
+    }
+
+    @Override
+    public void onLoaderReset(android.content.Loader<List<Movie>> loader) {
+        Log.e("ONLOADERRESET","RESET");
+        adapter = new BrowseMoviesAdapter(getActivity(),new ArrayList<Movie>());
+    }
+
 
     public interface OnItemSelectedListener {
         void onItemSelected(Movie movie,ImageView posterView);
@@ -64,13 +102,69 @@ public class BrowseMoviesActivityFragment extends Fragment {
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(getString(R.string.bundle_json_response_key), jsonResponse.toString());
+    }
+
+    @Override
     public void onAttach(Activity activity) {
+        Log.e("ONATTACH", "Hold");
         super.onAttach(activity);
+
         if (activity instanceof OnItemSelectedListener){
             listener = (OnItemSelectedListener) activity;
         } else {
-        throw new ClassCastException(activity.toString()
+            throw new ClassCastException(activity.toString()
+                    + " must implement ItemsListFragment.OnItemSelectedListener");
+        }
+        mContext = activity;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        Log.e("ONATTACH", "H");
+        super.onAttach(context);
+        if (context instanceof OnItemSelectedListener){
+            listener = (OnItemSelectedListener) context;
+        } else {
+        throw new ClassCastException(context.toString()
                 + " must implement ItemsListFragment.OnItemSelectedListener");
+        }
+        mContext = context;
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        android.content.Loader l = getLoaderManager().getLoader(LOADER_ID);
+        if (l==null){
+            Log.e("NULL","NULL");
+        }else {
+            Log.e("FOUNDONE!","asd");
+        }
+        sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
+
+        args.putString(getString(R.string.bundle_json_response_key), jsonResponse.toString());
+
+
+        if(adapter.isEmpty()) {
+            if (Utilities.checkConnectivity(getActivity())) {
+                if (sort_pref.equals(modePopular)) {
+                    params = new String[]{popularMoviesURL,String.valueOf(scrollPage)};
+                    args.putStringArray(getString(R.string.bundle_params_key), params);
+                    getLoaderManager().initLoader(LOADER_ID, args, this);
+                } else if (sort_pref.equals(modeTopRated)) {
+                    params = new String[]{topRatedMoviesURL,String.valueOf(scrollPage)};
+                    args.putStringArray(getString(R.string.bundle_params_key), params);
+                    getLoaderManager().initLoader(LOADER_ID, args, this);
+                } else {
+                    getFavorites();
+                }
+            } else {
+                editor.putString(getString(R.string.sort_mode_key), modeFavorites);
+                editor.commit();
+                getFavorites();
+            }
         }
     }
 
@@ -98,6 +192,15 @@ public class BrowseMoviesActivityFragment extends Fragment {
                 .appendQueryParameter(getString(R.string.api_key_query_param), getString(R.string.movie_db_api_key))
                 .build();
         topRatedMoviesURL = topRatedURI.toString();
+        if (savedInstanceState != null){
+            String stringResponse = savedInstanceState.getString(getString(R.string.bundle_json_response_key));
+            try {
+                jsonResponse = new JSONArray(stringResponse);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     @Override
@@ -109,7 +212,7 @@ public class BrowseMoviesActivityFragment extends Fragment {
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
-        Utilities.menuSortCheck(menu,sort_pref,getActivity());
+        Utilities.menuSortCheck(menu, sort_pref, getActivity());
     }
 
     @Override
@@ -118,6 +221,7 @@ public class BrowseMoviesActivityFragment extends Fragment {
         scrollPage = 1;
         sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
         offlineView.setVisibility(View.GONE);
+        args.putString(getString(R.string.bundle_json_response_key), jsonResponse.toString());
         switch (item.getItemId()){
 
             case R.id.action_settings :
@@ -130,7 +234,9 @@ public class BrowseMoviesActivityFragment extends Fragment {
 
                 if (Utilities.checkConnectivity(getActivity())){
                     if ((sort_pref.equals(modeTopRated)) || (sort_pref.equals(modeFavorites))) {
-                        new FetchMovies().execute(popularMoviesURL, String.valueOf(scrollPage));
+                        params = new String[]{popularMoviesURL,String.valueOf(scrollPage)};
+                        args.putStringArray(getString(R.string.bundle_params_key), params);
+                        getLoaderManager().restartLoader(LOADER_ID, args, this);
                     }
                 }else{
                         gridView.setAdapter(adapter);
@@ -145,7 +251,9 @@ public class BrowseMoviesActivityFragment extends Fragment {
                 editor.putString(getString(R.string.sort_mode_key), modeTopRated);
                 if (Utilities.checkConnectivity(getActivity())) {
                     if ((sort_pref.equals(modePopular)) || (sort_pref.equals(modeFavorites))) {
-                        new FetchMovies().execute(topRatedMoviesURL, String.valueOf(scrollPage));
+                        params = new String[]{topRatedMoviesURL,String.valueOf(scrollPage)};
+                        args.putStringArray(getString(R.string.bundle_params_key), params);
+                        getLoaderManager().restartLoader(LOADER_ID, args, this);
                     }
                 }else{
                     gridView.setAdapter(adapter);
@@ -172,6 +280,7 @@ public class BrowseMoviesActivityFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_browse, container, false);
 
+
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         offlineView  = (LinearLayout) rootView.findViewById(R.id.offline_view);
 
@@ -183,175 +292,48 @@ public class BrowseMoviesActivityFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
                 ImageView gridPoster = (ImageView) view.findViewById(R.id.movie_poster);
-                if (Utilities.isLollipopandAbove()){
+                if (Utilities.isLollipopandAbove()) {
                     gridPoster.setTransitionName("poster" + position);
                 }
                 Movie movie = null;
                 if (!sort_pref.equals(modeFavorites)) {
                     try {
                         JSONObject movieJson = jsonResponse.getJSONObject(position);
-                        movie = new Movie(movieJson.getString("id"), movieJson.getString("original_title")
-                                , movieJson.getString("release_date"), movieJson.getString("vote_average"), movieJson.getString("overview")
-                                , movieJson.getString("poster_path"), movieJson.getString("poster_path"), movieJson.getString("backdrop_path"));
-
+                        if (movieJson!=null) {
+                            movie = new Movie(movieJson.getString("id"), movieJson.getString("original_title")
+                                    , movieJson.getString("release_date"), movieJson.getString("vote_average"), movieJson.getString("overview")
+                                    , movieJson.getString("poster_path"), movieJson.getString("poster_path"), movieJson.getString("backdrop_path"));
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }else{
+                } else {
                     movie = (Movie) adapter.getItem(position);
                 }
-                listener.onItemSelected(movie,gridPoster);
+                listener.onItemSelected(movie, gridPoster);
             }
         });
+        final BrowseMoviesActivityFragment browseFragment = this;
         gridView.setOnScrollListener(new EndlessScrollListener(5, 1) {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
                 sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
                 scrollPage++;
-
+                args.putString(getString(R.string.bundle_json_response_key), jsonResponse.toString());
                 if (sort_pref.equals(modePopular)) {
-                    new FetchMovies().execute(popularMoviesURL, String.valueOf(scrollPage));
+                    params = new String[]{popularMoviesURL, String.valueOf(scrollPage)};
+                    args.putStringArray(getString(R.string.bundle_params_key), params);
+                    getLoaderManager().restartLoader(LOADER_ID, args, browseFragment);
 
                 } else if (sort_pref.equals(modeTopRated)) {
-                    new FetchMovies().execute(topRatedMoviesURL, String.valueOf(scrollPage));
+                    params = new String[]{topRatedMoviesURL, String.valueOf(scrollPage)};
+                    args.putStringArray(getString(R.string.bundle_params_key), params);
+                    getLoaderManager().restartLoader(LOADER_ID, args, browseFragment);
                 }
             }
         });
 
         return rootView;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-
-        sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
-        if(adapter.isEmpty()) {
-            if (Utilities.checkConnectivity(getActivity())) {
-
-                if (sort_pref.equals(modePopular)) {
-                    new FetchMovies().execute(popularMoviesURL, String.valueOf(scrollPage));
-
-                } else if (sort_pref.equals(modeTopRated)) {
-                    new FetchMovies().execute(topRatedMoviesURL, String.valueOf(scrollPage));
-                } else {
-                    getFavorites();
-                }
-            } else {
-                editor.putString(getString(R.string.sort_mode_key), modeFavorites);
-                editor.commit();
-                getFavorites();
-            }
-        }
-}
-
-    public class FetchMovies extends AsyncTask<String, Void, List<Movie>> {
-
-        private final String LOG_TAG = FetchMovies.class.getSimpleName();
-        private String moviesJsonStr;
-
-
-        private List<Movie> getMoviesfromJson(JSONArray moviesArray) throws JSONException {
-            List<Movie> movies = new ArrayList<>();
-            Movie movie;
-            for (int i = 0; i < moviesArray.length(); i++) {
-                JSONObject jsonMovie = (JSONObject) moviesArray.get(i);
-                if (!jsonMovie.getString("poster_path").equals("null")) {
-                    movie = new Movie(jsonMovie.getString("id"), jsonMovie.getString("original_title"), jsonMovie.getString("poster_path"));
-                }else{
-                    movie = new Movie(jsonMovie.getString("id"), jsonMovie.getString("original_title"), jsonMovie.getString("backdrop_path"));
-                }
-                movies.add(movie);
-            }
-            return movies;
-
-        }
-
-        @Override
-        protected List<Movie> doInBackground(String... params) {
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-            Uri uri = Uri.parse(params[0]).buildUpon().appendQueryParameter("page",params[1]).build();
-            URL url = null;
-            try {
-                url = new URL(uri.toString());
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-
-
-            try {
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-
-
-                InputStream inputStream = urlConnection.getInputStream();
-
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    // Nothing to do.
-                    return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
-                    buffer.append(line + "\n");
-                }
-
-                if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    return null;
-                }
-                moviesJsonStr = buffer.toString();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-                Log.e(LOG_TAG, "Error ", e1);
-                return null;
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
-                    }
-                }
-            }
-            try {
-                JSONObject object = new JSONObject(moviesJsonStr);
-                JSONArray moviesArray = object.getJSONArray("results");
-                for (int i = 0; i < moviesArray.length(); i++) {
-                    jsonResponse.put(moviesArray.getJSONObject(i));
-                }
-                return getMoviesfromJson(moviesArray);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(List<Movie> result) {
-            if (result != null) {
-                if (adapter.isEmpty()){
-                    Log.e("ONPOSTMAIN","ISEMPTY");
-                    adapter.add(result);
-                    gridView.setAdapter(adapter);
-                }else {
-                    Log.e("ONPOSTMAIN","NOTEMPTY");
-                    adapter.add(result);
-                    adapter.notifyDataSetChanged();
-                }
-            }
-        }
     }
 
     private void getFavorites(){
@@ -373,14 +355,6 @@ public class BrowseMoviesActivityFragment extends Fragment {
             adapter.add(movieList);
             adapter.notifyDataSetChanged();
         }
-    }
-
-    public void setActivateOnItemClick(boolean activateOnItemClick) {
-        // When setting CHOICE_MODE_SINGLE, GridView will automatically
-        // give items the 'activated' state when touched.
-        gridView.setChoiceMode(
-                activateOnItemClick ? GridView.CHOICE_MODE_SINGLE
-                        : GridView.CHOICE_MODE_NONE);
     }
 }
 
