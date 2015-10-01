@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -89,25 +90,43 @@ public class Utilities {
         return result;
     }
 
-    public static void setListViewHeightBasedOnChildren(ListView listView) {
-        ListAdapter listAdapter = listView.getAdapter();
+    public static void setListViewHeightBasedOnChildren(final ListView listView) {
+        final ListAdapter listAdapter = listView.getAdapter();
         if (listAdapter == null) {
             // pre-condition
             return;
         }
+        listView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                int totalHeight = listView.getPaddingTop() + listView.getPaddingBottom();
+                Log.e("TOTALHEIGHT",String.valueOf(totalHeight));
+                int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.AT_MOST);
+                Log.e("TOTALHEIGHT",String.valueOf(desiredWidth));
 
-        int totalHeight = listView.getPaddingTop() + listView.getPaddingBottom();
-        int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.AT_MOST);
-        for (int i = 0; i < listAdapter.getCount(); i++) {
-            View listItem = listAdapter.getView(i, null, listView);
-            listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
-            totalHeight += listItem.getMeasuredHeight();
-        }
+                Log.e("LISTVIEWITEMCOUNT",String.valueOf(listAdapter.getCount()));
+                for (int i = 0; i < listAdapter.getCount(); i++) {
+                    View listItem = listAdapter.getView(i, null, listView);
+                    listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+                    Log.e("LISTITEMHEIGHT", String.valueOf(listItem.getMeasuredHeight()));
+                    Log.e("LISTITEMWIDTH", String.valueOf(listItem.getMeasuredWidth()));
+                    totalHeight += listItem.getMeasuredHeight();
+                    Log.e("TOTALHEIGHTITEM", String.valueOf(totalHeight));
+                }
 
-        ViewGroup.LayoutParams params = listView.getLayoutParams();
-        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
-        listView.setLayoutParams(params);
-        listView.requestLayout();
+                ViewGroup.LayoutParams params = listView.getLayoutParams();
+                params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+                Log.e("LISTVIEWHEIGHT", String.valueOf(params.height));
+                listView.setLayoutParams(params);
+                listView.requestLayout();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    listView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                }else {
+                    listView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                }
+            }
+        });
+
     }
 
     public static Boolean checkConnectivity(Context context) {

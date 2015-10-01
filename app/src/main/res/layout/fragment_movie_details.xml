@@ -53,7 +53,7 @@
         android:paddingBottom="10dp">
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             tools:context="com.example.rashwan.popularmovies.MovieDetailsActivityFragment"
             android:orientation="vertical"
             android:focusableInTouchMode="true">

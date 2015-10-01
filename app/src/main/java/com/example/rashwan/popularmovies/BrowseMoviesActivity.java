@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.transition.TransitionInflater;
@@ -66,7 +65,7 @@ public class BrowseMoviesActivity extends AppCompatActivity implements BrowseMov
         if (isTwoPane){
             if (selectedItem != Integer.valueOf(movie.getId())){
                 selectedItem = Integer.valueOf(movie.getId());
-                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
 
                 if (Utilities.isLollipopandAbove()){
                     MovieDetailsActivityFragment detailsFragment = MovieDetailsActivityFragment.newInstance(movie,posterView.getTransitionName());

@@ -1,16 +1,16 @@
 package com.example.rashwan.popularmovies;
 
 import android.annotation.SuppressLint;
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.content.Loader;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
@@ -34,21 +34,10 @@ import com.github.florent37.picassopalette.PicassoPalette;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MovieDetailsActivityFragment extends Fragment {
+public class MovieDetailsActivityFragment extends android.app.Fragment implements LoaderManager.LoaderCallbacks<List<?>>{
     Movie movie;
     TrailerAdapter trailerAdapter;
     ListView trailersListview;
@@ -61,7 +50,8 @@ public class MovieDetailsActivityFragment extends Fragment {
     Boolean isLollipop;
     Toolbar toolbar;
     String transitionName;
-
+    private static final int TRAILER_LOADER_ID = 2;
+    private static final int REVIEW_LOADER_ID = 3;
 
     private static final String TRAILER_BASE_URL ="http://api.themoviedb.org/3/movie/%s/videos";
     private static final String REVIEW_BASE_URL = "http://api.themoviedb.org/3/movie/%s/reviews";
@@ -82,6 +72,49 @@ public class MovieDetailsActivityFragment extends Fragment {
     }
 
     @Override
+    public Loader<List<?>> onCreateLoader(int id, Bundle args) {
+        Log.e("ONCREATELOADER", "H");
+        return new FetchDetailsAsync(getActivity(),args);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<?>> loader, List<?> data) {
+        FetchDetailsAsync detailsAsync = (FetchDetailsAsync) loader;
+        Boolean isTrailer = detailsAsync.getIsTrailer();
+        if (data!=null && !data.isEmpty()) {
+            dividers.setVisibility(View.VISIBLE);
+            if (isTrailer) {
+
+                trailersHeader.setVisibility(View.VISIBLE);
+                List<Trailer> trailersList = (List<Trailer>) data;
+                trailerAdapter.add(trailersList);
+                movie.setTrailers(trailersList);
+                Utilities.setListViewHeightBasedOnChildren(trailersListview);
+                trailerAdapter.notifyDataSetChanged();
+
+            } else {
+                reviewsHeader.setVisibility(View.VISIBLE);
+                List<Review> reviewsList = (List<Review>) data;
+                reviewAdapter.add(reviewsList);
+                movie.setReviews(reviewsList);
+                Utilities.setListViewHeightBasedOnChildren(reviewsListview);
+                reviewAdapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<?>> loader) {
+        FetchDetailsAsync detailsAsync = (FetchDetailsAsync) loader;
+        Boolean isTrailer = detailsAsync.getIsTrailer();
+        if (isTrailer){
+            trailerAdapter = new TrailerAdapter(getActivity(),new ArrayList<Trailer>());
+        }else {
+            reviewAdapter = new ReviewAdapter(getActivity(),new ArrayList<Review>());
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
@@ -99,12 +132,15 @@ public class MovieDetailsActivityFragment extends Fragment {
         }
     }
 
+    @SuppressLint("NewApi")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case android.R.id.home:
                 super.onStop();
-                getActivity().supportFinishAfterTransition();
+                if (isLollipop){
+                    getActivity().finishAfterTransition();
+                }
                 return true;
             case R.id.menu_share:
                 List<Trailer> trailerList = movie.getTrailers();
@@ -119,14 +155,21 @@ public class MovieDetailsActivityFragment extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        Log.e("ONResume", "Ww");
+
+        super.onResume();
         if (isAdded()) {
+            Bundle args = new Bundle();
+            args.putString(getString(R.string.bundle_movie_id_key),movie.getId());
+
             if (trailerAdapter.isEmpty()) {
-                new FetchDetails().execute(TRAILER_BASE_URL, movie.getId());
+                args.putString(getString(R.string.bundle_base_url_key), TRAILER_BASE_URL);
+                getLoaderManager().initLoader(TRAILER_LOADER_ID, args, this);
             }
             if (reviewAdapter.isEmpty()) {
-                new FetchDetails().execute(REVIEW_BASE_URL, movie.getId());
+                args.putString(getString(R.string.bundle_base_url_key), REVIEW_BASE_URL);
+                getLoaderManager().initLoader(REVIEW_LOADER_ID, args, this);
             }
         }
 
@@ -175,13 +218,13 @@ public class MovieDetailsActivityFragment extends Fragment {
             fabFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (isFavorite){
-                        Utilities.movieDisliked(movie.getId(),getActivity());
-                    }else {
+                    if (isFavorite) {
+                        Utilities.movieDisliked(movie.getId(), getActivity());
+                    } else {
                         Utilities.movieLiked(movie, getActivity());
                     }
-                    isFavorite = Utilities.checkFavorite(movie.getId(),getActivity());
-                    Utilities.updateHeartButton((FloatingActionButton) v,isFavorite);
+                    isFavorite = Utilities.checkFavorite(movie.getId(), getActivity());
+                    Utilities.updateHeartButton((FloatingActionButton) v, isFavorite);
                 }
             });
             if (movie != null) {
@@ -232,7 +275,7 @@ public class MovieDetailsActivityFragment extends Fragment {
                     titleView.setText(movieTitle);
                 }else {
                     //SinglePane Mode With CollapsingToolbarLayout
-                    if (Utilities.getDeviceSW(getContext())>=600){
+                    if (Utilities.getDeviceSW(getActivity())>=600){
                         if (movieTitle.length()>33){
                             collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.small_expanded);
                             collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.small_collapsed);
@@ -251,8 +294,10 @@ public class MovieDetailsActivityFragment extends Fragment {
                 userRatingView.setText(getString((R.string.vote_average), movie.getVoteAverage()));
                 plotView.setText(movie.getPlot());
             }
+
             trailerAdapter = new TrailerAdapter(getActivity(), new ArrayList<Trailer>());
             trailersListview.setAdapter(trailerAdapter);
+
             trailersListview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -261,12 +306,9 @@ public class MovieDetailsActivityFragment extends Fragment {
                     startActivity(trailerIntent);
                 }
             });
+                reviewAdapter = new ReviewAdapter(getActivity(),new ArrayList<Review>());
+                reviewsListview.setAdapter(reviewAdapter);
 
-            reviewAdapter = new ReviewAdapter(getActivity(),new ArrayList<Review>());
-            reviewsListview.setAdapter(reviewAdapter);
-
-
-//        }
 
 
         return rootView;
@@ -293,147 +335,4 @@ public class MovieDetailsActivityFragment extends Fragment {
             }
         }
     }
-
-    public class FetchDetails extends AsyncTask<String,Void,List<?>>{
-        private String responseJsonString;
-        private final  String LOG_TAG = AsyncTask.class.getSimpleName();
-        private Boolean isTrailer;
-
-
-        private List<Trailer> getTrailersFromJson(String trailersJsonString) throws JSONException {
-            JSONObject object = new JSONObject(trailersJsonString);
-            JSONArray  trailersArray = object.getJSONArray("results");
-            List<Trailer> trailerList = new ArrayList<>();
-            Trailer trailer;
-
-            for (int i = 0; i < trailersArray.length(); i++) {
-                JSONObject jsonTrailer = trailersArray.getJSONObject(i);
-                trailer = new Trailer(jsonTrailer.getString("key"),jsonTrailer.getString("name"));
-                trailerList.add(trailer);
-                movie.setTrailers(trailerList);
-            }
-            return trailerList;
-
-        }
-
-
-        private List<Review> getReviewsFromJson(String reviewsJsonString) throws JSONException {
-            JSONObject object = new JSONObject(reviewsJsonString);
-            JSONArray  reviewsArray = object.getJSONArray("results");
-            List<Review> reviewsList = new ArrayList<>();
-            Review review;
-
-            for (int i = 0; i < reviewsArray.length(); i++) {
-                JSONObject jsonReview = reviewsArray.getJSONObject(i);
-                review = new Review(jsonReview.getString("author"),jsonReview.getString("content"));
-                reviewsList.add(review);
-                movie.setReviews(reviewsList);
-            }
-            return reviewsList;
-
-        }
-
-
-        @Override
-        protected List<?> doInBackground(String... params) {
-            if (isAdded()) {
-                HttpURLConnection urlConnection = null;
-                BufferedReader reader = null;
-                String baseURl = String.format(params[0], params[1]);
-                if (params[0].contains("videos")) {
-                    isTrailer = true;
-                } else {
-                    isTrailer = false;
-                }
-                Uri uri = Uri.parse(baseURl).buildUpon().appendQueryParameter(getString(R.string.api_key_query_param), getString(R.string.movie_db_api_key)).build();
-                URL url = null;
-                try {
-                    url = new URL(uri.toString());
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-
-                try {
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setRequestMethod("GET");
-                    urlConnection.connect();
-
-                    InputStream inputStream = urlConnection.getInputStream();
-
-                    StringBuffer buffer = new StringBuffer();
-                    if (inputStream == null) {
-                        // Nothing to do.
-                        return null;
-                    }
-                    reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                        // But it does make debugging a *lot* easier if you print out the completed
-                        // buffer for debugging.
-                        buffer.append(line + "\n");
-                    }
-
-                    if (buffer.length() == 0) {
-                        // Stream was empty.  No point in parsing.
-                        return null;
-                    }
-                    responseJsonString = buffer.toString();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                    Log.e(LOG_TAG, "Error ", e1);
-                    return null;
-                } finally {
-                    if (urlConnection != null) {
-                        urlConnection.disconnect();
-                    }
-                    if (reader != null) {
-                        try {
-                            reader.close();
-                        } catch (final IOException e) {
-                            Log.e(LOG_TAG, "Error closing stream", e);
-                        }
-                    }
-                }
-                try {
-                    if (isTrailer) {
-                        return getTrailersFromJson(responseJsonString);
-                    } else {
-                        return getReviewsFromJson(responseJsonString);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(List<?>responseList) {
-            Log.e(LOG_TAG, "ONPOST");
-            if (responseList!=null && !responseList.isEmpty()) {
-                dividers.setVisibility(View.VISIBLE);
-                if (isTrailer) {
-                    trailersHeader.setVisibility(View.VISIBLE);
-                    List<Trailer> trailersList = (List<Trailer>) responseList;
-                    trailerAdapter.add(trailersList);
-                    Utilities.setListViewHeightBasedOnChildren(trailersListview);
-                    trailerAdapter.notifyDataSetChanged();
-
-                } else {
-                    reviewsHeader.setVisibility(View.VISIBLE);
-                    List<Review> reviewsList = (List<Review>) responseList;
-                    for (Review review : reviewsList) {
-                        Log.e(LOG_TAG, review.getAuthor() + ": " + review.getContent());
-                    }
-                    reviewAdapter.add(reviewsList);
-                    Utilities.setListViewHeightBasedOnChildren(reviewsListview);
-                    reviewAdapter.notifyDataSetChanged();
-                }
-            }
-        }
-    }
-
 }

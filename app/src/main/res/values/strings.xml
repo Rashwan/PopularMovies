@@ -27,4 +27,6 @@
     <string name="release_date_title">Release Date : </string>
     <string name="bundle_json_response_key">jsonResponse</string>
     <string name="bundle_params_key">params</string>
+    <string name="bundle_base_url_key">base_url</string>
+    <string name="bundle_movie_id_key">movie_id</string>
 </resources>

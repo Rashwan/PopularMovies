@@ -41,7 +41,10 @@ public class TrailerAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View trailerView = inflater.inflate(R.layout.trailer_list_item, null);
+        View trailerView = convertView;
+        if (convertView == null){
+            trailerView = inflater.inflate(R.layout.trailer_list_item, null);
+        }
 
         ImageView trailerThumbnail = (ImageView) trailerView.findViewById(R.id.youtube_thumbnail);
         TextView trailerName = (TextView) trailerView.findViewById(R.id.trailer_name);
