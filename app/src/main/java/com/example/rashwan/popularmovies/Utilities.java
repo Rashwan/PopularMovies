@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.OvershootInterpolator;
+import android.widget.GridView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
@@ -36,16 +37,26 @@ import com.example.rashwan.popularmovies.provider.movie.MovieSelection;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by rashwan on 9/13/15.
  */
 public class Utilities {
 
-    public static Bitmap blurRenderScript(Bitmap smallBitmap, int radius, Context context) {
+    public interface FavoriteStateListener{
+        void favStateChanged();
+    }
+    public static FavoriteStateListener favListener;
 
+    public static void setFavListener(FavoriteStateListener favListener) {
+        Utilities.favListener = favListener;
+    }
+
+    public static Bitmap blurRenderScript(Bitmap smallBitmap, int radius, Context context) {
         try {
             smallBitmap = RGB565toARGB888(smallBitmap);
         } catch (Exception e) {
@@ -113,7 +124,7 @@ public class Utilities {
                 listView.requestLayout();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     listView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                }else {
+                } else {
                     listView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 }
             }
@@ -132,7 +143,6 @@ public class Utilities {
     }
 
     public static void createShareIntent(Activity activity, String title, String trailerUrl) {
-
         ShareCompat.IntentBuilder builder = ShareCompat.IntentBuilder.from(activity)
                 .setType("text/plain")
                 .setText(activity.getString(R.string.share_text, title, trailerUrl));
@@ -170,14 +180,20 @@ public class Utilities {
         contentValues.putMovieId(movie.getId()).putTitle(movie.getTitle()).putReleaseDate(movie.getReleaseDate())
                 .putVoteAverage(movie.getVoteAverage()).putPlot(movie.getPlot()).putHomeUri(movie.getHomePath()).
                 putPosterUri(movie.getPosterPath()).putBlurPosterUri(movie.getBlurPosterPath());
-        return context.getContentResolver().insert(MovieColumns.CONTENT_URI, contentValues.values());
+        Uri uri = context.getContentResolver().insert(MovieColumns.CONTENT_URI, contentValues.values());
+        favListener.favStateChanged();
+
+        return uri;
     }
 
     public static Boolean movieDisliked(String movieId,Context context){
         MovieSelection where = new MovieSelection();
         int rows = where.movieId(movieId).delete(context);
+        Boolean disliked = rows!=0;
+        favListener.favStateChanged();
 
-       return rows!=0;
+
+        return disliked;
     }
 
     public static Boolean checkFavorite(String movieId,Context context){
@@ -233,5 +249,24 @@ public class Utilities {
         }
         Log.e("UTILITIES",monthString);
         return monthString;
+    }
+    public static List<Movie> getFavorites(Context context){
+        MovieSelection where = new MovieSelection();
+        MovieCursor cursor = where.query(context);
+        Movie movie;
+        List<Movie> movieList = new ArrayList<>();
+        while (cursor.moveToNext()) {
+
+            movie = new Movie(cursor.getMovieId(), cursor.getTitle(), cursor.getReleaseDate(), cursor.getVoteAverage(),
+                    cursor.getPlot(), cursor.getHomeUri(), cursor.getPosterUri(), cursor.getBlurPosterUri());
+            movieList.add(movie);
+        }
+        cursor.close();
+        return movieList;
+    }
+    public static void setFavoritesAdapter(Context context,GridView gridView,BrowseMoviesAdapter adapter,List<Movie> movieList){
+        adapter.clear();
+        adapter.add(movieList);
+        gridView.setAdapter(adapter);
     }
 }

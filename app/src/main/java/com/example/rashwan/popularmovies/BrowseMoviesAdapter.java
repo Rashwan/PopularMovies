@@ -80,5 +80,8 @@ public class BrowseMoviesAdapter extends BaseAdapter {
             mMovies.add(result.get(i));
         }
     }
+    public void clear(){
+        mMovies.clear();
+    }
 
 }

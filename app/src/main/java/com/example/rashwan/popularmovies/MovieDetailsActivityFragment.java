@@ -318,7 +318,7 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
 
 
     private void applyPalette(Palette palette,CollapsingToolbarLayout collapsingToolbar){
-        if (palette !=null && toolbar!=null) {
+        if (palette !=null && showActionBar) {
             Palette.Swatch vibrantSwatch = palette.getVibrantSwatch();
             if (vibrantSwatch!=null){
                 int actionBarColorRGB = vibrantSwatch.getRgb();

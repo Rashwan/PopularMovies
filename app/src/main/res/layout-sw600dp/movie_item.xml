@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="2dp"
-    android:background="@color/color_primary"
-    android:clipChildren="false">
+    android:background="@color/color_primary">
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="245dp"

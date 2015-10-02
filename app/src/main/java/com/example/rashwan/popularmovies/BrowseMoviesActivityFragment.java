@@ -19,9 +19,6 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.example.rashwan.popularmovies.provider.movie.MovieCursor;
-import com.example.rashwan.popularmovies.provider.movie.MovieSelection;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,12 +27,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class BrowseMoviesActivityFragment extends android.app.Fragment implements android.app.LoaderManager.LoaderCallbacks<List<Movie>> {
+public class BrowseMoviesActivityFragment extends android.app.Fragment implements android.app.LoaderManager.LoaderCallbacks<List<Movie>> , Utilities.FavoriteStateListener{
     private String popularMoviesURL;
     private String topRatedMoviesURL;
     private BrowseMoviesAdapter adapter;
     private GridView gridView;
     private LinearLayout offlineView;
+    private LinearLayout noFavoritesView;
     private SharedPreferences menu_sp ;
     private SharedPreferences.Editor editor;
     private String sort_pref;
@@ -49,6 +47,7 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
     Context mContext;
     private Bundle args = new Bundle();
     private String[] params;
+    Utilities.FavoriteStateListener favlistener;
 
     @Override
     public android.content.Loader<List<Movie>> onCreateLoader(int id, Bundle args) {
@@ -88,9 +87,20 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
 
     @Override
     public void onLoaderReset(android.content.Loader<List<Movie>> loader) {
-        Log.e("ONLOADERRESET","RESET");
+        Log.e("ONLOADERRESET", "RESET");
         adapter = new BrowseMoviesAdapter(getActivity(),new ArrayList<Movie>());
     }
+
+    @Override
+    public void favStateChanged() {
+        Log.e("FAVSTARCHANGED","HER");
+        List<Movie> movies = Utilities.getFavorites(getActivity());
+        if (sort_pref.equals(getString(R.string.sort_mode_favorites))){
+            Utilities.setFavoritesAdapter(getActivity(),gridView,adapter,movies);
+
+        }
+    }
+
 
 
     public interface OnItemSelectedListener {
@@ -137,13 +147,9 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
     public void onResume() {
         super.onResume();
         android.content.Loader l = getLoaderManager().getLoader(LOADER_ID);
-        if (l==null){
-            Log.e("NULL","NULL");
-        }else {
-            Log.e("FOUNDONE!","asd");
-        }
-        sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
 
+        sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
+        noFavoritesView.setVisibility(View.GONE);
         args.putString(getString(R.string.bundle_json_response_key), jsonResponse.toString());
 
 
@@ -158,12 +164,21 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
                     args.putStringArray(getString(R.string.bundle_params_key), params);
                     getLoaderManager().initLoader(LOADER_ID, args, this);
                 } else {
-                    getFavorites();
+                    List<Movie> moviesList = Utilities.getFavorites(getActivity());
+                    Utilities.setFavoritesAdapter(getActivity(),gridView, adapter, moviesList);
+                    if(adapter.isEmpty()){
+                        Log.e("ISEMPTY!!!!!!!1","Z");
+                        noFavoritesView.setVisibility(View.VISIBLE);
+                    }
                 }
             } else {
                 editor.putString(getString(R.string.sort_mode_key), modeFavorites);
                 editor.commit();
-                getFavorites();
+                List<Movie> moviesList = Utilities.getFavorites(getActivity());
+                Utilities.setFavoritesAdapter(getActivity(),gridView,adapter,moviesList);
+                if(adapter.isEmpty()){
+                    noFavoritesView.setVisibility(View.VISIBLE);
+                }
             }
         }
     }
@@ -172,6 +187,9 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        Utilities.setFavListener(this);
+
         menu_sp = getActivity().getPreferences(Context.MODE_PRIVATE);
         sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), getString(R.string.sort_mode_popular));
         editor = menu_sp.edit();
@@ -182,7 +200,7 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
         //Build popular movies query URL
         Uri popularURI = Uri.parse(getString(R.string.movies_base_url)).buildUpon()
                 .appendPath(getString(R.string.popular_path))
-                .appendQueryParameter(getString(R.string.api_key_query_param),getString(R.string.movie_db_api_key))
+                .appendQueryParameter(getString(R.string.api_key_query_param), getString(R.string.movie_db_api_key))
                 .build();
         popularMoviesURL = popularURI.toString();
 
@@ -221,6 +239,7 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
         scrollPage = 1;
         sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
         offlineView.setVisibility(View.GONE);
+        noFavoritesView.setVisibility(View.GONE);
         args.putString(getString(R.string.bundle_json_response_key), jsonResponse.toString());
         switch (item.getItemId()){
 
@@ -267,7 +286,11 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
                 adapter = new BrowseMoviesAdapter(getActivity(), new ArrayList<Movie>());
                 editor.putString(getString(R.string.sort_mode_key), modeFavorites);
                 editor.commit();
-                getFavorites();
+                List<Movie> moviesList = Utilities.getFavorites(getActivity());
+                Utilities.setFavoritesAdapter(getActivity(),gridView, adapter, moviesList);
+                if(adapter.isEmpty()){
+                    noFavoritesView.setVisibility(View.VISIBLE);
+                }
                 return true;
         }
 
@@ -283,6 +306,7 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
 
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         offlineView  = (LinearLayout) rootView.findViewById(R.id.offline_view);
+        noFavoritesView = (LinearLayout) rootView.findViewById(R.id.no_favorites_view);
 
         adapter = new BrowseMoviesAdapter(getActivity(),new ArrayList<Movie>());
 
@@ -299,7 +323,7 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
                 if (!sort_pref.equals(modeFavorites)) {
                     try {
                         JSONObject movieJson = jsonResponse.getJSONObject(position);
-                        if (movieJson!=null) {
+                        if (movieJson != null) {
                             movie = new Movie(movieJson.getString("id"), movieJson.getString("original_title")
                                     , movieJson.getString("release_date"), movieJson.getString("vote_average"), movieJson.getString("overview")
                                     , movieJson.getString("poster_path"), movieJson.getString("poster_path"), movieJson.getString("backdrop_path"));
@@ -334,27 +358,6 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
         });
 
         return rootView;
-    }
-
-    private void getFavorites(){
-        MovieSelection where = new MovieSelection();
-        MovieCursor cursor = where.query(getActivity());
-        Movie movie;
-        List<Movie> movieList = new ArrayList<>();
-        while (cursor.moveToNext()) {
-
-            movie = new Movie(cursor.getMovieId(), cursor.getTitle(), cursor.getReleaseDate(), cursor.getVoteAverage(),
-                    cursor.getPlot(), cursor.getHomeUri(), cursor.getPosterUri(), cursor.getBlurPosterUri());
-            movieList.add(movie);
-        }
-        cursor.close();
-        if (adapter.isEmpty()){
-            adapter.add(movieList);
-            gridView.setAdapter(adapter);
-        }else {
-            adapter.add(movieList);
-            adapter.notifyDataSetChanged();
-        }
     }
 }
 
