@@ -18,7 +18,7 @@ public class MovieDetalisActivity extends AppCompatActivity{
         }
         Movie movie = getIntent().getParcelableExtra(getString(R.string.movie_details_extra_key));
         if (savedInstanceState == null){
-            detailsFragment = MovieDetailsActivityFragment.newInstance(movie,transitionName);
+            detailsFragment = MovieDetailsActivityFragment.newInstance(movie,transitionName,true);
             android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
             ft.replace(R.id.movie_detail_container,detailsFragment);
             ft.commit();

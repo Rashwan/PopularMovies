@@ -68,12 +68,12 @@ public class BrowseMoviesActivity extends AppCompatActivity implements BrowseMov
                 android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
 
                 if (Utilities.isLollipopandAbove()){
-                    MovieDetailsActivityFragment detailsFragment = MovieDetailsActivityFragment.newInstance(movie,posterView.getTransitionName());
+                    MovieDetailsActivityFragment detailsFragment = MovieDetailsActivityFragment.newInstance(movie,posterView.getTransitionName(),false);
                     detailsFragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_left));
                     ft.replace(R.id.movie_detail_container,detailsFragment).addSharedElement(posterView,posterView.getTransitionName()).commit();
 
                 }else {
-                    MovieDetailsActivityFragment detailsFragment = MovieDetailsActivityFragment.newInstance(movie,null);
+                    MovieDetailsActivityFragment detailsFragment = MovieDetailsActivityFragment.newInstance(movie,null,false);
                     ft.replace(R.id.movie_detail_container,detailsFragment).commit();
                 }
             }

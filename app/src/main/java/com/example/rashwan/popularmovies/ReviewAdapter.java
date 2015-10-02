@@ -39,7 +39,10 @@ public class ReviewAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View reviewView = inflater.inflate(R.layout.review_list_item,null);
+        View reviewView = convertView;
+        if (convertView == null){
+            reviewView = inflater.inflate(R.layout.review_list_item,null);
+        }
         TextView reviewAuthor = (TextView) reviewView.findViewById(R.id.review_author);
         TextView reviewContent = (TextView) reviewView.findViewById(R.id.review_content);
         Review review = (Review) getItem(position);

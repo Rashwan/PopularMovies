@@ -23,7 +23,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/blur_poster"
-                app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
                 app:layout_collapseMode="parallax" />
             <ImageView
                 android:layout_width="match_parent"
@@ -40,7 +39,9 @@
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                 app:layout_collapseMode="pin" />
         </android.support.design.widget.CollapsingToolbarLayout>
+
     </android.support.design.widget.AppBarLayout>
+
 
     <android.support.v4.widget.NestedScrollView
         android:layout_height="match_parent"
@@ -53,7 +54,8 @@
         android:paddingBottom="10dp">
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             tools:context="com.example.rashwan.popularmovies.MovieDetailsActivityFragment"
             android:orientation="vertical"
             android:focusableInTouchMode="true">
@@ -77,7 +79,6 @@
                         android:id="@+id/poster"
                         android:transitionName="poster"/>
                 </FrameLayout>
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -101,7 +102,7 @@
                             android:text="MAY 1993"
                             android:id="@+id/release_date_formatted"
                             android:textAppearance="@style/body_bold_text"
-                            android:layout_gravity="center"/>
+                            android:gravity="center"/>
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -124,10 +125,8 @@
                             android:id="@+id/user_rating"
                             android:textAppearance="@style/body_bold_text"
                             android:textSize="16sp"
-                            android:layout_gravity="center" />
+                            android:gravity="center" />
                     </LinearLayout>
-
-
                 </LinearLayout>
             </LinearLayout>
             <View
@@ -184,7 +183,7 @@
                 android:paddingTop="5dp"
                 android:textColor="@color/color_primary_dark"
                 android:visibility="gone"
-                android:id="@+id/reviews_header" />
+                android:id="@+id/reviews_header"/>
             <ListView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

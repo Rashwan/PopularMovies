@@ -50,6 +50,7 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
     Boolean isLollipop;
     Toolbar toolbar;
     String transitionName;
+    private Boolean showActionBar;
     private static final int TRAILER_LOADER_ID = 2;
     private static final int REVIEW_LOADER_ID = 3;
 
@@ -60,13 +61,14 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
 
     }
 
-    public static MovieDetailsActivityFragment newInstance(Movie movie,String transitionName) {
+    public static MovieDetailsActivityFragment newInstance(Movie movie,String transitionName,Boolean showToolBar) {
         MovieDetailsActivityFragment detailsFragment = new MovieDetailsActivityFragment();
         Bundle args = new Bundle();
         args.putParcelable("movie", movie);
         if (transitionName !=null){
             args.putString("transition", transitionName);
         }
+        args.putBoolean("toolbar",showToolBar);
         detailsFragment.setArguments(args);
         return detailsFragment;
     }
@@ -93,6 +95,7 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
                 trailerAdapter.notifyDataSetChanged();
 
             } else {
+                Log.e("ONLOADFINISHEDREVIEWS","||");
                 reviewsHeader.setVisibility(View.VISIBLE);
                 List<Review> reviewsList = (List<Review>) data;
                 reviewAdapter.add(reviewsList);
@@ -119,6 +122,7 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         movie = getArguments().getParcelable("movie");
+        showActionBar = getArguments().getBoolean("toolbar");
         if (getArguments().containsKey("transition")){
             transitionName = getArguments().getString("transition");
         }
@@ -184,8 +188,9 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
 
         toolbar = (Toolbar) rootView.findViewById(R.id.toolbar_details);
 
-        if (toolbar!= null){
+        if (showActionBar && toolbar!= null){
             //onePane Mode
+            toolbar.setVisibility(View.VISIBLE);
             ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
             try {
                 ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -270,7 +275,7 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
                 });
 
                 String movieTitle = movie.getTitle();
-                if (titleView != null){
+                if (titleView != null && !showActionBar){
                     //TwoPane Mode
                     titleView.setText(movieTitle);
                 }else {
@@ -308,15 +313,12 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
             });
                 reviewAdapter = new ReviewAdapter(getActivity(),new ArrayList<Review>());
                 reviewsListview.setAdapter(reviewAdapter);
-
-
-
         return rootView;
     }
 
 
     private void applyPalette(Palette palette,CollapsingToolbarLayout collapsingToolbar){
-        if (palette !=null && toolbar != null) {
+        if (palette !=null && toolbar!=null) {
             Palette.Swatch vibrantSwatch = palette.getVibrantSwatch();
             if (vibrantSwatch!=null){
                 int actionBarColorRGB = vibrantSwatch.getRgb();
