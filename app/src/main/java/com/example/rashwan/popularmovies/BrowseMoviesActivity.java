@@ -14,6 +14,9 @@ import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.example.rashwan.popularmovies.pojos.Movie;
+import com.example.rashwan.popularmovies.utilities.Utilities;
+
 public class BrowseMoviesActivity extends AppCompatActivity implements BrowseMoviesActivityFragment.OnItemSelectedListener{
     private Boolean isTwoPane = false;
     private int selectedItem = -1;

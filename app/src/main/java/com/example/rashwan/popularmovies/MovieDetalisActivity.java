@@ -4,6 +4,9 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.example.rashwan.popularmovies.pojos.Movie;
+import com.example.rashwan.popularmovies.utilities.Utilities;
+
 public class MovieDetalisActivity extends AppCompatActivity{
     MovieDetailsActivityFragment detailsFragment;
     @SuppressLint("NewApi")

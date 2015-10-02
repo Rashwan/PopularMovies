@@ -1,4 +1,4 @@
-package com.example.rashwan.popularmovies;
+package com.example.rashwan.popularmovies.pojos;
 
 /**
  * Created by rashwan on 9/11/15.

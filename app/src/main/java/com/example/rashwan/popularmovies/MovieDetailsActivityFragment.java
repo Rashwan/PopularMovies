@@ -29,6 +29,13 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.rashwan.popularmovies.adapters.ReviewAdapter;
+import com.example.rashwan.popularmovies.adapters.TrailerAdapter;
+import com.example.rashwan.popularmovies.asyncTasks.FetchDetailsAsync;
+import com.example.rashwan.popularmovies.pojos.Movie;
+import com.example.rashwan.popularmovies.pojos.Review;
+import com.example.rashwan.popularmovies.pojos.Trailer;
+import com.example.rashwan.popularmovies.utilities.Utilities;
 import com.github.florent37.picassopalette.BitmapPalette;
 import com.github.florent37.picassopalette.PicassoPalette;
 import com.squareup.picasso.Callback;

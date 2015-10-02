@@ -1,10 +1,14 @@
-package com.example.rashwan.popularmovies;
+package com.example.rashwan.popularmovies.asyncTasks;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+
+import com.example.rashwan.popularmovies.R;
+import com.example.rashwan.popularmovies.pojos.Review;
+import com.example.rashwan.popularmovies.pojos.Trailer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,19 +29,18 @@ import java.util.List;
  */
 public class FetchDetailsAsync extends AsyncTaskLoader<List<?>>{
     private Boolean isTrailer;
-    Context mContext;
-    String baseUrl;
-    String movieId;
+    private Context mContext;
+    private String baseUrl;
+    private String movieId;
 
     private static final String LOG_TAG = FetchDetailsAsync.class.getSimpleName();
     private List<?> mData;
 
     public FetchDetailsAsync(Context context,Bundle args) {
         super(context);
-        Log.e("CONSTRUCTOR", "HH");
 
-        this.baseUrl = args.getString(context.getString(R.string.bundle_base_url_key));
-        this.movieId = args.getString(context.getString(R.string.bundle_movie_id_key));
+        baseUrl = args.getString(context.getString(R.string.bundle_base_url_key));
+        movieId = args.getString(context.getString(R.string.bundle_movie_id_key));
         mContext = context;
     }
 
@@ -105,8 +108,10 @@ public class FetchDetailsAsync extends AsyncTaskLoader<List<?>>{
             }
             try {
                 if (isTrailer) {
+                    //We Are Fetching Trailers
                     return getTrailersFromJson(responseJsonString);
                 } else {
+                    //We Are Fetching Reviews
                     return getReviewsFromJson(responseJsonString);
                 }
             } catch (JSONException e) {
@@ -118,13 +123,13 @@ public class FetchDetailsAsync extends AsyncTaskLoader<List<?>>{
 
     private List<Trailer> getTrailersFromJson(String trailersJsonString) throws JSONException {
         JSONObject object = new JSONObject(trailersJsonString);
-        JSONArray trailersArray = object.getJSONArray("results");
+        JSONArray trailersArray = object.getJSONArray(mContext.getString(R.string.json_result_key));
         List<Trailer> trailerList = new ArrayList<>();
         Trailer trailer;
 
         for (int i = 0; i < trailersArray.length(); i++) {
             JSONObject jsonTrailer = trailersArray.getJSONObject(i);
-            trailer = new Trailer(jsonTrailer.getString("key"),jsonTrailer.getString("name"));
+            trailer = new Trailer(jsonTrailer.getString(mContext.getString(R.string.json_trailer_key_key)),jsonTrailer.getString(mContext.getString(R.string.json_trailer_name_key)));
             trailerList.add(trailer);
         }
         return trailerList;
@@ -134,13 +139,13 @@ public class FetchDetailsAsync extends AsyncTaskLoader<List<?>>{
 
     private List<Review> getReviewsFromJson(String reviewsJsonString) throws JSONException {
         JSONObject object = new JSONObject(reviewsJsonString);
-        JSONArray  reviewsArray = object.getJSONArray("results");
+        JSONArray  reviewsArray = object.getJSONArray(mContext.getString(R.string.json_result_key));
         List<Review> reviewsList = new ArrayList<>();
         Review review;
 
         for (int i = 0; i < reviewsArray.length(); i++) {
             JSONObject jsonReview = reviewsArray.getJSONObject(i);
-            review = new Review(jsonReview.getString("author"),jsonReview.getString("content"));
+            review = new Review(jsonReview.getString(mContext.getString(R.string.json_review_author_key)),jsonReview.getString(mContext.getString(R.string.json_review_content_key)));
             reviewsList.add(review);
         }
         return reviewsList;
@@ -187,7 +192,7 @@ public class FetchDetailsAsync extends AsyncTaskLoader<List<?>>{
         // Ensure the loader is stopped
         onStopLoading();
 
-        // At this point we can release the resources associated with 'apps'
+        // At this point we can release the resources associated with 'mData'
         // if needed.
         if (mData != null) {
             mData = null;

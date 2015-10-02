@@ -1,4 +1,4 @@
-package com.example.rashwan.popularmovies;
+package com.example.rashwan.popularmovies.utilities;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -18,7 +18,6 @@ import android.support.v8.renderscript.Allocation;
 import android.support.v8.renderscript.Element;
 import android.support.v8.renderscript.RenderScript;
 import android.support.v8.renderscript.ScriptIntrinsicBlur;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,6 +28,9 @@ import android.widget.GridView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+import com.example.rashwan.popularmovies.R;
+import com.example.rashwan.popularmovies.adapters.BrowseMoviesAdapter;
+import com.example.rashwan.popularmovies.pojos.Movie;
 import com.example.rashwan.popularmovies.provider.movie.MovieColumns;
 import com.example.rashwan.popularmovies.provider.movie.MovieContentValues;
 import com.example.rashwan.popularmovies.provider.movie.MovieCursor;
@@ -47,23 +49,24 @@ import java.util.List;
  */
 public class Utilities {
 
+    /*Listener for Changes in Favorite State Of A movie*/
     public interface FavoriteStateListener{
         void favStateChanged();
     }
+
     public static FavoriteStateListener favListener;
 
     public static void setFavListener(FavoriteStateListener favListener) {
         Utilities.favListener = favListener;
     }
 
+    /* Adding Blur Effect to a Bitmap */
     public static Bitmap blurRenderScript(Bitmap smallBitmap, int radius, Context context) {
         try {
             smallBitmap = RGB565toARGB888(smallBitmap);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
         Bitmap bitmap = Bitmap.createBitmap(
                 smallBitmap.getWidth(), smallBitmap.getHeight(),
                 Bitmap.Config.ARGB_8888);
@@ -86,6 +89,7 @@ public class Utilities {
 
     }
 
+    /* Helper Function for Adding Blur Effect */
     public static Bitmap RGB565toARGB888(Bitmap img) throws Exception {
         int numPixels = img.getWidth() * img.getHeight();
         int[] pixels = new int[numPixels];
@@ -101,6 +105,7 @@ public class Utilities {
         return result;
     }
 
+    /* Helper Function to accommodate a ListView inside a NestedScrollView  */
     public static void setListViewHeightBasedOnChildren(final ListView listView) {
         final ListAdapter listAdapter = listView.getAdapter();
         if (listAdapter == null) {
@@ -132,6 +137,7 @@ public class Utilities {
 
     }
 
+    /*Helper Method to Check For Internet*/
     public static Boolean checkConnectivity(Context context) {
         ConnectivityManager cm =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -142,6 +148,7 @@ public class Utilities {
         return isConnected;
     }
 
+    /*Helper Method for Setting-up a Movie Trailer Share Intent */
     public static void createShareIntent(Activity activity, String title, String trailerUrl) {
         ShareCompat.IntentBuilder builder = ShareCompat.IntentBuilder.from(activity)
                 .setType("text/plain")
@@ -149,6 +156,7 @@ public class Utilities {
         activity.startActivity(Intent.createChooser(builder.getIntent(), activity.getString(R.string.share_chooser_title)));
     }
 
+    /*Helper Method for Setting The FAB icon Based on the movie State*/
     public static void updateHeartButton(final FloatingActionButton fab,final Boolean isFavorite) {
         AnimatorSet animatorSet = new AnimatorSet();
 
@@ -175,27 +183,34 @@ public class Utilities {
         animatorSet.start();
     }
 
+    /*Helper Method for Adding a Favorite Movie to the Database*/
     public static Uri movieLiked(Movie movie,Context context){
         MovieContentValues contentValues = new MovieContentValues();
         contentValues.putMovieId(movie.getId()).putTitle(movie.getTitle()).putReleaseDate(movie.getReleaseDate())
                 .putVoteAverage(movie.getVoteAverage()).putPlot(movie.getPlot()).putHomeUri(movie.getHomePath()).
                 putPosterUri(movie.getPosterPath()).putBlurPosterUri(movie.getBlurPosterPath());
+
         Uri uri = context.getContentResolver().insert(MovieColumns.CONTENT_URI, contentValues.values());
+        //Alert the Favorite Listener With the Change
         favListener.favStateChanged();
 
         return uri;
     }
 
+    /*Helper Method for Removing a Favorite Movie from the Database*/
     public static Boolean movieDisliked(String movieId,Context context){
         MovieSelection where = new MovieSelection();
         int rows = where.movieId(movieId).delete(context);
         Boolean disliked = rows!=0;
+
+        //Alert the Favorite Listener With the Change
         favListener.favStateChanged();
 
 
         return disliked;
     }
 
+    /* Helper Method for Checking if a Movie is Favorited or Not */
     public static Boolean checkFavorite(String movieId,Context context){
         MovieSelection where = new MovieSelection();
         MovieCursor cursor = where.movieId(movieId).query(context);
@@ -204,10 +219,12 @@ public class Utilities {
         return isFavorite;
     }
 
+    /*Helper Method To Check if the Device is Running Lollipop & Above*/
     public static Boolean isLollipopandAbove(){
         return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) ;
     }
 
+    /*Helper Method for Marking the selected Menu Item as Checked*/
     public static void menuSortCheck(Menu menu,String sortPref, Activity activity){
         MenuItem item;
         if (sortPref.equals(activity.getString(R.string.sort_mode_popular))){
@@ -221,9 +238,13 @@ public class Utilities {
             item.setChecked(true);
         }
     }
+
+    /*Helper Method to Get the Smallest Width of the Device*/
     public static int getDeviceSW(Context context){
         return context.getResources().getConfiguration().smallestScreenWidthDp;
     }
+
+    /*Helper Method to Format The Release Date i.e: May 2015*/
     public static String getFormattedDate(String releaseDate){
         Date date ;
         Calendar cal1 ;
@@ -247,14 +268,16 @@ public class Utilities {
             monthString = releaseDate;
             e.printStackTrace();
         }
-        Log.e("UTILITIES",monthString);
         return monthString;
     }
+
+    /*Helper Method to Query the Database for Favorited Movies*/
     public static List<Movie> getFavorites(Context context){
         MovieSelection where = new MovieSelection();
         MovieCursor cursor = where.query(context);
         Movie movie;
         List<Movie> movieList = new ArrayList<>();
+
         while (cursor.moveToNext()) {
 
             movie = new Movie(cursor.getMovieId(), cursor.getTitle(), cursor.getReleaseDate(), cursor.getVoteAverage(),
@@ -264,7 +287,9 @@ public class Utilities {
         cursor.close();
         return movieList;
     }
-    public static void setFavoritesAdapter(Context context,GridView gridView,BrowseMoviesAdapter adapter,List<Movie> movieList){
+
+    /*Helper Method for Setting the Favorites Adapter After Being Updated*/
+    public static void setFavoritesAdapter(GridView gridView,BrowseMoviesAdapter adapter,List<Movie> movieList){
         adapter.clear();
         adapter.add(movieList);
         gridView.setAdapter(adapter);

@@ -1,4 +1,4 @@
-package com.example.rashwan.popularmovies;
+package com.example.rashwan.popularmovies.utilities;
 
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;

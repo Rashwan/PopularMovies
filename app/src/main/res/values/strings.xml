@@ -29,4 +29,15 @@
     <string name="bundle_params_key">params</string>
     <string name="bundle_base_url_key">base_url</string>
     <string name="bundle_movie_id_key">movie_id</string>
+    <string name="json_trailer_key_key">key</string>
+    <string name="json_trailer_name_key">name</string>
+    <string name="json_result_key">results</string>
+    <string name="json_review_author_key">author</string>
+    <string name="json_review_content_key">content</string>
+    <string name="bundle_url_key">url</string>
+    <string name="bundle_scroll_page_key">scrollPage</string>
+    <string name="json_movie_poster_key">poster_path</string>
+    <string name="json_movie_id_key">id</string>
+    <string name="json_movie_title_key">original_title</string>
+    <string name="json_movie_backdrop_key">backdrop_path</string>
 </resources>

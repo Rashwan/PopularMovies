@@ -1,4 +1,4 @@
-package com.example.rashwan.popularmovies;
+package com.example.rashwan.popularmovies.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,6 +8,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.rashwan.popularmovies.R;
+import com.example.rashwan.popularmovies.pojos.Trailer;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -16,8 +18,8 @@ import java.util.List;
  * Created by rashwan on 9/12/15.
  */
 public class TrailerAdapter extends BaseAdapter {
-    Context mContext;
-    List<Trailer> mTrailers;
+    private Context mContext;
+    private List<Trailer> mTrailers;
     public TrailerAdapter(Context context,List<Trailer> trailers) {
         this.mContext =context;
         this.mTrailers = trailers;
@@ -60,5 +62,8 @@ public class TrailerAdapter extends BaseAdapter {
         for (int i = 0; i < result.size(); i++) {
             mTrailers.add(result.get(i));
         }
+    }
+    public void clear(){
+        mTrailers.clear();
     }
 }

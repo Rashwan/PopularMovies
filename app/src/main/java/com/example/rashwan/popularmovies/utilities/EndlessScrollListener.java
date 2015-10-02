@@ -1,4 +1,4 @@
-package com.example.rashwan.popularmovies;
+package com.example.rashwan.popularmovies.utilities;
 
 import android.util.Log;
 import android.widget.AbsListView;

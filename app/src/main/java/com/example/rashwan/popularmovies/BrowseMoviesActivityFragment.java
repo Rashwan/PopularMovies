@@ -19,6 +19,12 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.example.rashwan.popularmovies.adapters.BrowseMoviesAdapter;
+import com.example.rashwan.popularmovies.asyncTasks.FetchMoviesAsync;
+import com.example.rashwan.popularmovies.pojos.Movie;
+import com.example.rashwan.popularmovies.utilities.EndlessScrollListener;
+import com.example.rashwan.popularmovies.utilities.Utilities;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,8 +52,6 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
     private static final int LOADER_ID = 1;
     Context mContext;
     private Bundle args = new Bundle();
-    private String[] params;
-    Utilities.FavoriteStateListener favlistener;
 
     @Override
     public android.content.Loader<List<Movie>> onCreateLoader(int id, Bundle args) {
@@ -96,7 +100,7 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
         Log.e("FAVSTARCHANGED","HER");
         List<Movie> movies = Utilities.getFavorites(getActivity());
         if (sort_pref.equals(getString(R.string.sort_mode_favorites))){
-            Utilities.setFavoritesAdapter(getActivity(),gridView,adapter,movies);
+            Utilities.setFavoritesAdapter(gridView,adapter,movies);
 
         }
     }
@@ -155,17 +159,19 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
 
         if(adapter.isEmpty()) {
             if (Utilities.checkConnectivity(getActivity())) {
+
                 if (sort_pref.equals(modePopular)) {
-                    params = new String[]{popularMoviesURL,String.valueOf(scrollPage)};
-                    args.putStringArray(getString(R.string.bundle_params_key), params);
+                    args.putString(getString(R.string.bundle_url_key),popularMoviesURL);
+                    args.putString(getString(R.string.bundle_scroll_page_key), String.valueOf(scrollPage));
                     getLoaderManager().initLoader(LOADER_ID, args, this);
+
                 } else if (sort_pref.equals(modeTopRated)) {
-                    params = new String[]{topRatedMoviesURL,String.valueOf(scrollPage)};
-                    args.putStringArray(getString(R.string.bundle_params_key), params);
+                    args.putString(getString(R.string.bundle_url_key),topRatedMoviesURL);
+                    args.putString(getString(R.string.bundle_scroll_page_key), String.valueOf(scrollPage));
                     getLoaderManager().initLoader(LOADER_ID, args, this);
                 } else {
                     List<Movie> moviesList = Utilities.getFavorites(getActivity());
-                    Utilities.setFavoritesAdapter(getActivity(),gridView, adapter, moviesList);
+                    Utilities.setFavoritesAdapter(gridView, adapter, moviesList);
                     if(adapter.isEmpty()){
                         Log.e("ISEMPTY!!!!!!!1","Z");
                         noFavoritesView.setVisibility(View.VISIBLE);
@@ -175,7 +181,7 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
                 editor.putString(getString(R.string.sort_mode_key), modeFavorites);
                 editor.commit();
                 List<Movie> moviesList = Utilities.getFavorites(getActivity());
-                Utilities.setFavoritesAdapter(getActivity(),gridView,adapter,moviesList);
+                Utilities.setFavoritesAdapter(gridView,adapter,moviesList);
                 if(adapter.isEmpty()){
                     noFavoritesView.setVisibility(View.VISIBLE);
                 }
@@ -253,8 +259,8 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
 
                 if (Utilities.checkConnectivity(getActivity())){
                     if ((sort_pref.equals(modeTopRated)) || (sort_pref.equals(modeFavorites))) {
-                        params = new String[]{popularMoviesURL,String.valueOf(scrollPage)};
-                        args.putStringArray(getString(R.string.bundle_params_key), params);
+                        args.putString(getString(R.string.bundle_url_key),popularMoviesURL);
+                        args.putString(getString(R.string.bundle_scroll_page_key), String.valueOf(scrollPage));
                         getLoaderManager().restartLoader(LOADER_ID, args, this);
                     }
                 }else{
@@ -270,8 +276,8 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
                 editor.putString(getString(R.string.sort_mode_key), modeTopRated);
                 if (Utilities.checkConnectivity(getActivity())) {
                     if ((sort_pref.equals(modePopular)) || (sort_pref.equals(modeFavorites))) {
-                        params = new String[]{topRatedMoviesURL,String.valueOf(scrollPage)};
-                        args.putStringArray(getString(R.string.bundle_params_key), params);
+                        args.putString(getString(R.string.bundle_url_key),topRatedMoviesURL);
+                        args.putString(getString(R.string.bundle_scroll_page_key), String.valueOf(scrollPage));
                         getLoaderManager().restartLoader(LOADER_ID, args, this);
                     }
                 }else{
@@ -287,7 +293,7 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
                 editor.putString(getString(R.string.sort_mode_key), modeFavorites);
                 editor.commit();
                 List<Movie> moviesList = Utilities.getFavorites(getActivity());
-                Utilities.setFavoritesAdapter(getActivity(),gridView, adapter, moviesList);
+                Utilities.setFavoritesAdapter(gridView, adapter, moviesList);
                 if(adapter.isEmpty()){
                     noFavoritesView.setVisibility(View.VISIBLE);
                 }
@@ -344,14 +350,15 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
                 sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
                 scrollPage++;
                 args.putString(getString(R.string.bundle_json_response_key), jsonResponse.toString());
+
                 if (sort_pref.equals(modePopular)) {
-                    params = new String[]{popularMoviesURL, String.valueOf(scrollPage)};
-                    args.putStringArray(getString(R.string.bundle_params_key), params);
+                    args.putString(getString(R.string.bundle_url_key),popularMoviesURL);
+                    args.putString(getString(R.string.bundle_scroll_page_key), String.valueOf(scrollPage));
                     getLoaderManager().restartLoader(LOADER_ID, args, browseFragment);
 
                 } else if (sort_pref.equals(modeTopRated)) {
-                    params = new String[]{topRatedMoviesURL, String.valueOf(scrollPage)};
-                    args.putStringArray(getString(R.string.bundle_params_key), params);
+                    args.putString(getString(R.string.bundle_url_key),topRatedMoviesURL);
+                    args.putString(getString(R.string.bundle_scroll_page_key), String.valueOf(scrollPage));
                     getLoaderManager().restartLoader(LOADER_ID, args, browseFragment);
                 }
             }

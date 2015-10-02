@@ -1,4 +1,4 @@
-package com.example.rashwan.popularmovies;
+package com.example.rashwan.popularmovies.adapters;
 
 import android.content.Context;
 import android.net.Uri;
@@ -10,6 +10,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.rashwan.popularmovies.pojos.Movie;
+import com.example.rashwan.popularmovies.R;
+import com.example.rashwan.popularmovies.utilities.Utilities;
 import com.github.florent37.picassopalette.PicassoPalette;
 import com.squareup.picasso.Picasso;
 
@@ -22,7 +25,7 @@ import java.util.List;
 public class BrowseMoviesAdapter extends BaseAdapter {
     private Context mContext;
     private List<Movie> mMovies = new ArrayList<>();
-    boolean isConnected ;
+    private boolean isConnected ;
 
     public BrowseMoviesAdapter(Context context, List<Movie> movies) {
         this.mContext = context;

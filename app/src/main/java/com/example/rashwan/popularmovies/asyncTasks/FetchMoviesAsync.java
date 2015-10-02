@@ -1,9 +1,12 @@
-package com.example.rashwan.popularmovies;
+package com.example.rashwan.popularmovies.asyncTasks;
 
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+
+import com.example.rashwan.popularmovies.R;
+import com.example.rashwan.popularmovies.pojos.Movie;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,21 +26,25 @@ import java.util.List;
  * Created by rashwan on 9/30/15.
  */
 public class FetchMoviesAsync extends android.content.AsyncTaskLoader<List<Movie>> {
+
     private static final String LOG_TAG = FetchMoviesAsync.class.getSimpleName();
-    private String[] params;
-    private String moviesJsonStr;
     private JSONArray jsonResponse = new JSONArray();
+    private String baseUrl;
+    private String scrollPage;
     private List<Movie> mData;
+    private Context mContext;
+
     public FetchMoviesAsync(Context context, Bundle args) {
         super(context);
-        Log.e(LOG_TAG,"CONSTRUCTOR");
-        this.params = args.getStringArray("params");
-        String stringResponse = args.getString("jsonResponse");
+        mContext = context;
+        String stringResponse = args.getString(mContext.getString(R.string.bundle_json_response_key));
         try {
             this.jsonResponse = new JSONArray(stringResponse);
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        baseUrl = args.getString(mContext.getString(R.string.bundle_url_key));
+        scrollPage = args.getString(mContext.getString(R.string.bundle_scroll_page_key));
     }
 
     public JSONArray getJsonResponse() {
@@ -46,19 +53,17 @@ public class FetchMoviesAsync extends android.content.AsyncTaskLoader<List<Movie
 
     @Override
     public List<Movie> loadInBackground() {
-        Log.e(LOG_TAG, "DOINBACKGROUND");
-        Log.e(LOG_TAG,params[0] + " " + params[1]);
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
-        Uri uri = Uri.parse(params[0]).buildUpon().appendQueryParameter("page",params[1]).build();
+        Uri uri = Uri.parse(baseUrl).buildUpon().appendQueryParameter("page",scrollPage).build();
         URL url = null;
         try {
             url = new URL(uri.toString());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-
-
+        
+        String moviesJsonStr;
         try {
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
@@ -105,7 +110,7 @@ public class FetchMoviesAsync extends android.content.AsyncTaskLoader<List<Movie
         }
         try {
             JSONObject object = new JSONObject(moviesJsonStr);
-            JSONArray moviesArray = object.getJSONArray("results");
+            JSONArray moviesArray = object.getJSONArray(mContext.getString(R.string.json_result_key));
             for (int i = 0; i < moviesArray.length(); i++) {
                 jsonResponse.put(moviesArray.getJSONObject(i));
             }
@@ -119,30 +124,23 @@ public class FetchMoviesAsync extends android.content.AsyncTaskLoader<List<Movie
     public List<Movie> getMoviesfromJson(JSONArray moviesArray) throws JSONException {
         List<Movie> movies = new ArrayList<>();
         Movie movie;
+
         for (int i = 0; i < moviesArray.length(); i++) {
             JSONObject jsonMovie = (JSONObject) moviesArray.get(i);
-            if (!jsonMovie.getString("poster_path").equals("null")) {
-                movie = new Movie(jsonMovie.getString("id"), jsonMovie.getString("original_title"), jsonMovie.getString("poster_path"));
+
+            if (!jsonMovie.getString(mContext.getString(R.string.json_movie_poster_key)).equals("null")) {
+                movie = new Movie(jsonMovie.getString(mContext.getString(R.string.json_movie_id_key)), jsonMovie.getString(mContext.getString(R.string.json_movie_title_key)), jsonMovie.getString(mContext.getString(R.string.json_movie_poster_key)));
+
             }else{
-                movie = new Movie(jsonMovie.getString("id"), jsonMovie.getString("original_title"), jsonMovie.getString("backdrop_path"));
+                movie = new Movie(jsonMovie.getString(mContext.getString(R.string.json_movie_id_key)), jsonMovie.getString(mContext.getString(R.string.json_movie_title_key)), jsonMovie.getString(mContext.getString(R.string.json_movie_backdrop_key)));
             }
-            Log.e(LOG_TAG,movie.getTitle());
             movies.add(movie);
         }
         return movies;
-
     }
 
     @Override
     public void deliverResult(List<Movie> data) {
-        if (isReset()) {
-            // An async query came in while the loader is stopped.  We
-            // don't need the result.
-            if (data != null) {
-                onReleaseResources(data);
-            }
-        }
-        List<Movie> oldData = mData;
 
         mData = data;
 
@@ -151,20 +149,13 @@ public class FetchMoviesAsync extends android.content.AsyncTaskLoader<List<Movie
             // deliver its results.
             super.deliverResult(data);
         }
-        // At this point we can release the resources associated with
-        // 'oldApps' if needed; now that the new result is delivered we
-        // know that it is no longer in use.
-        if (oldData != null) {
-            onReleaseResources(oldData);
-        }
     }
 
     @Override
     protected void onStartLoading() {
-        Log.e("ONSTARTLOADING", "HERE");
         super.onStartLoading();
+
         if (mData != null){
-            Log.e("ONSTARTLOADING",mData.toString());
             deliverResult(mData);
         }else {
             forceLoad();
@@ -174,15 +165,6 @@ public class FetchMoviesAsync extends android.content.AsyncTaskLoader<List<Movie
     @Override
     protected void onStopLoading() {
         cancelLoad();
-    }
-
-
-    @Override public void onCanceled(List<Movie> data) {
-        super.onCanceled(data);
-
-        // At this point we can release the resources associated with 'apps'
-        // if needed.
-        onReleaseResources(data);
     }
 
     /**
@@ -197,12 +179,7 @@ public class FetchMoviesAsync extends android.content.AsyncTaskLoader<List<Movie
         // At this point we can release the resources associated with 'apps'
         // if needed.
         if (mData != null) {
-            onReleaseResources(mData);
             mData = null;
         }
-    }
-    protected void onReleaseResources(List<Movie> apps) {
-        // For a simple List<> there is nothing to do.  For something
-        // like a Cursor, we would close it here.
     }
 }

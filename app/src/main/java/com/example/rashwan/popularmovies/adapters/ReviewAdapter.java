@@ -1,4 +1,4 @@
-package com.example.rashwan.popularmovies;
+package com.example.rashwan.popularmovies.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -6,6 +6,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import com.example.rashwan.popularmovies.R;
+import com.example.rashwan.popularmovies.pojos.Review;
 
 import java.util.List;
 
@@ -55,5 +58,8 @@ public class ReviewAdapter extends BaseAdapter {
         for (int i = 0; i < result.size(); i++) {
             mReviews.add(result.get(i));
         }
+    }
+    public void clear(){
+        mReviews.clear();
     }
 }

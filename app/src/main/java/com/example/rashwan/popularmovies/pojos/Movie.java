@@ -1,4 +1,4 @@
-package com.example.rashwan.popularmovies;
+package com.example.rashwan.popularmovies.pojos;
 
 import android.net.Uri;
 import android.os.Parcel;
