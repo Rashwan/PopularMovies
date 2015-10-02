@@ -62,6 +62,10 @@ public class BrowseMoviesAdapter extends BaseAdapter {
         TextView name = (TextView) movieView.findViewById(R.id.movie_name);
         LinearLayout girdLayout = (LinearLayout) movieView.findViewById(R.id.gird_layout);
 
+        if (nameString.length()<=18){
+
+            name.setTextAppearance(mContext,R.style.grid_title_text_big);
+        }
         name.setText(nameString);
         Picasso.with(mContext).load(posterUri).fit().into(poster
                 , PicassoPalette.with(posterUri.toString(), poster)

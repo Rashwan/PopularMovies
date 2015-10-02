@@ -100,23 +100,15 @@ public class Utilities {
             @Override
             public void onGlobalLayout() {
                 int totalHeight = listView.getPaddingTop() + listView.getPaddingBottom();
-                Log.e("TOTALHEIGHT",String.valueOf(totalHeight));
                 int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.AT_MOST);
-                Log.e("TOTALHEIGHT",String.valueOf(desiredWidth));
-
-                Log.e("LISTVIEWITEMCOUNT",String.valueOf(listAdapter.getCount()));
                 for (int i = 0; i < listAdapter.getCount(); i++) {
                     View listItem = listAdapter.getView(i, null, listView);
                     listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
-                    Log.e("LISTITEMHEIGHT", String.valueOf(listItem.getMeasuredHeight()));
-                    Log.e("LISTITEMWIDTH", String.valueOf(listItem.getMeasuredWidth()));
                     totalHeight += listItem.getMeasuredHeight();
-                    Log.e("TOTALHEIGHTITEM", String.valueOf(totalHeight));
                 }
 
                 ViewGroup.LayoutParams params = listView.getLayoutParams();
                 params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
-                Log.e("LISTVIEWHEIGHT", String.valueOf(params.height));
                 listView.setLayoutParams(params);
                 listView.requestLayout();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {

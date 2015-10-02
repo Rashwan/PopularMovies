@@ -14,8 +14,7 @@
     <RelativeLayout
         android:id="@+id/thumb_bottom_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="48dp"
+        android:layout_height="68dp"
         android:gravity="center_vertical">
 
         <TextView
@@ -24,7 +23,11 @@
             android:layout_height="match_parent"
             android:padding="16dp"
             android:textColor="@android:color/black"
-            android:textSize="14sp"
+            android:textAppearance="@android:style/TextAppearance.Small"
+            android:maxLines="2"
+            android:minLines="2"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
             />
 
     </RelativeLayout>

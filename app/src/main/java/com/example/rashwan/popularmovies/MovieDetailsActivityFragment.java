@@ -281,7 +281,7 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
                             collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.small_collapsed);
                         }
                     }else {
-                        if (movieTitle.length()>1){
+                        if (movieTitle.length()>15){
                             collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.small_expanded);
                             collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.small_collapsed);
                         }

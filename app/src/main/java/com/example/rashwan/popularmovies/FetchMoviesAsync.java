@@ -144,7 +144,6 @@ public class FetchMoviesAsync extends android.content.AsyncTaskLoader<List<Movie
         }
         List<Movie> oldData = mData;
 
-        Log.e("DELIVERRESULT", data.toString());
         mData = data;
 
         if (isStarted()) {
