@@ -5,5 +5,5 @@
     <color name="color_accent">#FFD740</color>
     <color name="color_text_primary">#212121</color>
     <color name="color_text_secondary">#727272</color>
-
+    <color name="movie_title_overly">#ff37474f</color>
 </resources>

@@ -1,43 +1,72 @@
 <resources xmlns:xliff="http://schemas.android.com/apk/res/android">
     <string name="app_name">Popular Movies</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_movie_details">Movie Details</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_movie_detalis">MovieDetalisActivity</string>
-    <string name="sort_top_rated_title">Sort by : Top Rated</string>
-    <string name="sort_popular_title">Sort By : Popular</string>
-    <string name="sort_mode_key">sort_mode</string>
-    <string name="sort_mode_popular">popular</string>
-    <string name="sort_mode_top_rated">topRated</string>
-    <string name="sort_mode_favorites">favorites</string>
+    <string name="shared_element_transition_name">transition</string>
+    <string name="movie_db_api_key">9c3654aee5aea28f21963eeebfd6f4a0</string>
+
+    <!--Movie DB Urls related-->
     <string name="movies_base_url">http://api.themoviedb.org/3/movie/</string>
     <string name="popular_path">popular</string>
     <string name="api_key_query_param">api_key</string>
     <string name="top_rated_path">top_rated</string>
     <string name="movie_details_extra_key">selectedMovie</string>
     <string name="poster_base_url">http://image.tmdb.org/t/p/w342</string>
-    <string name="movie_db_api_key">9c3654aee5aea28f21963eeebfd6f4a0</string>
     <string name="poster_image_url">
         http://img.youtube.com/vi/<xliff:g id="id">%1$s</xliff:g>/default.jpg
     </string>
+
+    <!-- Sort Mode Related Strings-->
+    <string name="sort_top_rated_title">Sort by : Top Rated</string>
+    <string name="sort_popular_title">Sort By : Popular</string>
+    <string name="sort_mode_key">sort_mode</string>
+    <string name="sort_mode_popular">popular</string>
+    <string name="sort_mode_top_rated">topRated</string>
+    <string name="sort_mode_favorites">favorites</string>
     <string name="pref_favorites_title">Favorites</string>
-    <string name="share_text">Watch <xliff:g id="title">%1$s</xliff:g> Trailer At <xliff:g id="trailerurl">%2$s</xliff:g></string>
-    <string name="share_chooser_title">Share Movie Trailer</string>
-    <string name="vote_average_title">Vote Average : </string>
-    <string name="vote_average"><xliff:g id="vote">%1$s</xliff:g> / 10</string>
-    <string name="release_date_title">Release Date : </string>
+
+    <!-- Bundle Keys-->
     <string name="bundle_json_response_key">jsonResponse</string>
     <string name="bundle_params_key">params</string>
     <string name="bundle_base_url_key">base_url</string>
     <string name="bundle_movie_id_key">movie_id</string>
+    <string name="bundle_url_key">url</string>
+    <string name="bundle_scroll_page_key">scrollPage</string>
+    <string name="bundle_show_toolbar">toolbar</string>
+
+    <!-- Json Response Keys-->
     <string name="json_trailer_key_key">key</string>
     <string name="json_trailer_name_key">name</string>
     <string name="json_result_key">results</string>
     <string name="json_review_author_key">author</string>
     <string name="json_review_content_key">content</string>
-    <string name="bundle_url_key">url</string>
-    <string name="bundle_scroll_page_key">scrollPage</string>
     <string name="json_movie_poster_key">poster_path</string>
     <string name="json_movie_id_key">id</string>
     <string name="json_movie_title_key">original_title</string>
     <string name="json_movie_backdrop_key">backdrop_path</string>
+
+    <!-- Image Content Description-->
+    <string name="content_description_trailer_thumbnail">Movie Trailer Thumbnail</string>
+    <string name="content_description_blur_poster">Big Movie Poster Image</string>
+    <string name="content_description_movie_poster">Movie Poster Image</string>
+    <string name="content_description_no_internet">no Internet Connection Image</string>
+    <string name="content_description_no_favorites">No Favorite Movies Image</string>
+
+    <!-- Placeholders-->
+    <string name="placeholder_review_content">Fabulous action movie. Lots of interesting characters. They don\'t make many movies like this. The whole movie from start to finish was entertaining I\'m looking forward to seeing it again. I definitely recommend seeing it.</string>
+    <string name="placeholder_trailer_name">Traile Name</string>
+    <string name="placeholder_review_author">Rashwan :</string>
+
+    <!-- Other UI strings-->
+    <string name="share_text">Watch <xliff:g id="title">%1$s</xliff:g> Trailer At <xliff:g id="trailerurl">%2$s</xliff:g></string>
+    <string name="share_chooser_title">Share Movie Trailer</string>
+    <string name="vote_average_title">Vote Average : </string>
+    <string name="vote_average"><xliff:g id="vote">%1$s</xliff:g> / 10</string>
+    <string name="release_date_title">Release Date : </string>
+    <string name="string_no_internet_connection">Please check your internet connection</string>
+    <string name="string_no_favorites">Nothing Is Here! Add Your Favorite Movies To View Them Offline.</string>
+    <string name="trailers_title">Trailers</string>
+    <string name="reviews_title">Reviews</string>
+    <string name="actionbar_share_title">Share</string>
+
 </resources>

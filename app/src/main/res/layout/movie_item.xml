@@ -9,7 +9,8 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="270dp"
-        android:id="@+id/movie_poster" />
+        android:id="@+id/movie_poster"
+        android:contentDescription="@string/content_description_movie_poster" />
 
     <RelativeLayout
         android:id="@+id/thumb_bottom_view"

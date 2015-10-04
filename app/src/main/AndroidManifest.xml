@@ -20,8 +20,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MovieDetalisActivity"
-            android:label="@string/title_activity_movie_detalis"
+            android:name=".MovieDetailsActivity"
+            android:label="@string/title_activity_movie_details"
             android:parentActivityName=".BrowseMoviesActivity" >
             <!-- Parent activity meta-data to support API level 7+ -->
             <meta-data

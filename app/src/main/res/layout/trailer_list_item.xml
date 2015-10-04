@@ -10,7 +10,8 @@
         android:layout_width="wrap_content"
         android:minWidth="60dp"
         android:layout_height="fill_parent"
-        android:id="@+id/youtube_thumbnail" />
+        android:id="@+id/youtube_thumbnail"
+        android:contentDescription="@string/content_description_trailer_thumbnail" />
 
     <TextView
         android:layout_width="0dp"
@@ -18,7 +19,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="@style/body_text"
         android:id="@+id/trailer_name"
-        android:text="Traile Name"
+        android:text="@string/placeholder_trailer_name"
         android:paddingLeft="16dp"
         android:layout_gravity="center"/>
 </LinearLayout>

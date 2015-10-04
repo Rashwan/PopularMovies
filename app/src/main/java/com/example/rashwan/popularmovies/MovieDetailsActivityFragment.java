@@ -1,7 +1,9 @@
 package com.example.rashwan.popularmovies;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.graphics.Bitmap;
@@ -14,7 +16,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -45,19 +46,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MovieDetailsActivityFragment extends android.app.Fragment implements LoaderManager.LoaderCallbacks<List<?>>{
-    Movie movie;
-    TrailerAdapter trailerAdapter;
-    ListView trailersListview;
-    ReviewAdapter reviewAdapter;
-    ListView reviewsListview;
-    TextView trailersHeader;
-    TextView reviewsHeader;
-    View dividers ;
-    Boolean isFavorite;
-    Boolean isLollipop;
-    Toolbar toolbar;
-    String transitionName;
+    private Movie movie;
+    private TrailerAdapter trailerAdapter;
+    private ListView trailersListview;
+    private ReviewAdapter reviewAdapter;
+    private ListView reviewsListview;
+    private TextView trailersHeader;
+    private TextView reviewsHeader;
+    private View dividers ;
+    private Boolean isFavorite;
+    private Boolean isLollipop;
+    private String transitionName;
     private Boolean showActionBar;
+    private Context mContext;
     private static final int TRAILER_LOADER_ID = 2;
     private static final int REVIEW_LOADER_ID = 3;
 
@@ -68,21 +69,20 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
 
     }
 
-    public static MovieDetailsActivityFragment newInstance(Movie movie,String transitionName,Boolean showToolBar) {
+    public static MovieDetailsActivityFragment newInstance(Context context,Movie movie,String transitionName,Boolean showToolBar) {
         MovieDetailsActivityFragment detailsFragment = new MovieDetailsActivityFragment();
         Bundle args = new Bundle();
-        args.putParcelable("movie", movie);
+        args.putParcelable(context.getString(R.string.movie_details_extra_key), movie);
         if (transitionName !=null){
-            args.putString("transition", transitionName);
+            args.putString(context.getString(R.string.shared_element_transition_name), transitionName);
         }
-        args.putBoolean("toolbar",showToolBar);
+        args.putBoolean(context.getString(R.string.bundle_show_toolbar),showToolBar);
         detailsFragment.setArguments(args);
         return detailsFragment;
     }
 
     @Override
     public Loader<List<?>> onCreateLoader(int id, Bundle args) {
-        Log.e("ONCREATELOADER", "H");
         return new FetchDetailsAsync(getActivity(),args);
     }
 
@@ -91,9 +91,9 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
         FetchDetailsAsync detailsAsync = (FetchDetailsAsync) loader;
         Boolean isTrailer = detailsAsync.getIsTrailer();
         if (data!=null && !data.isEmpty()) {
+            //We have either trailers or reviews
             dividers.setVisibility(View.VISIBLE);
             if (isTrailer) {
-
                 trailersHeader.setVisibility(View.VISIBLE);
                 List<Trailer> trailersList = (List<Trailer>) data;
                 trailerAdapter.add(trailersList);
@@ -102,7 +102,6 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
                 trailerAdapter.notifyDataSetChanged();
 
             } else {
-                Log.e("ONLOADFINISHEDREVIEWS","||");
                 reviewsHeader.setVisibility(View.VISIBLE);
                 List<Review> reviewsList = (List<Review>) data;
                 reviewAdapter.add(reviewsList);
@@ -125,15 +124,32 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mContext = context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mContext = null;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mContext = activity;
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        movie = getArguments().getParcelable("movie");
-        showActionBar = getArguments().getBoolean("toolbar");
-        if (getArguments().containsKey("transition")){
-            transitionName = getArguments().getString("transition");
+        movie = getArguments().getParcelable(getString(R.string.movie_details_extra_key));
+        showActionBar = getArguments().getBoolean(getString(R.string.bundle_show_toolbar));
+        if (getArguments().containsKey(getString(R.string.shared_element_transition_name))){
+            transitionName = getArguments().getString(getString(R.string.shared_element_transition_name));
         }
-
     }
 
     @Override
@@ -156,6 +172,7 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
             case R.id.menu_share:
                 List<Trailer> trailerList = movie.getTrailers();
                 if (!trailerList.isEmpty()) {
+                    //Share first trailer
                     Trailer firstTrailer = trailerList.get(0);
                     Utilities.createShareIntent(getActivity(), movie.getTitle(), firstTrailer.getTrailerUri().toString());
                 }
@@ -167,23 +184,21 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
 
     @Override
     public void onResume() {
-        Log.e("ONResume", "Ww");
-
         super.onResume();
         if (isAdded()) {
             Bundle args = new Bundle();
             args.putString(getString(R.string.bundle_movie_id_key),movie.getId());
-
+            //Load trailers
             if (trailerAdapter.isEmpty()) {
                 args.putString(getString(R.string.bundle_base_url_key), TRAILER_BASE_URL);
                 getLoaderManager().initLoader(TRAILER_LOADER_ID, args, this);
             }
+            //Load reviews
             if (reviewAdapter.isEmpty()) {
                 args.putString(getString(R.string.bundle_base_url_key), REVIEW_BASE_URL);
                 getLoaderManager().initLoader(REVIEW_LOADER_ID, args, this);
             }
         }
-
     }
 
     @SuppressLint("NewApi")
@@ -193,9 +208,9 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
 
         final View rootView = inflater.inflate(R.layout.fragment_movie_details, container, false);
 
-        toolbar = (Toolbar) rootView.findViewById(R.id.toolbar_details);
+        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar_details);
 
-        if (showActionBar && toolbar!= null){
+        if (showActionBar && toolbar != null){
             //onePane Mode
             toolbar.setVisibility(View.VISIBLE);
             ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
@@ -225,107 +240,122 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
         dividers = rootView.findViewById(R.id.reviews_divider);
         FloatingActionButton fabFavorite = (FloatingActionButton) rootView.findViewById(R.id.fab_favorite);
         final CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsingToolbarLayout);
+
+        //set Favorite FAB's initial status
         Utilities.updateHeartButton(fabFavorite,isFavorite);
 
-            fabFavorite.setOnClickListener(new View.OnClickListener() {
+        //set Favorite FAB's click listener
+        fabFavorite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            //User disliked the movie
+            if (isFavorite) {
+                Utilities.movieDisliked(movie.getId(), getActivity());
+                isFavorite = false;
+
+            //User liked the movie
+            } else {
+                Utilities.movieLiked(movie, getActivity());
+                isFavorite =true;
+            }
+            Utilities.updateHeartButton((FloatingActionButton) v, isFavorite);
+            }
+        });
+
+        //Load Movie Details
+        if (movie != null) {
+            Uri blurPosterUri = movie.getBlurPosterUri();
+
+            Picasso.with(getActivity()).load(blurPosterUri).fit().centerCrop()
+                .into(blur_poster, PicassoPalette.with(blurPosterUri.toString(), blur_poster)
+                        .intoCallBack(new BitmapPalette.CallBack() {
+                            @Override
+                            public void onPaletteLoaded(Palette palette) {
+                                if (mContext!= null){
+                                    //Add Blur
+                                    Bitmap bitmap = ((BitmapDrawable) blur_poster.getDrawable()).getBitmap();
+                                    blur_poster.setImageBitmap(Utilities.blurRenderScript(bitmap, 18, mContext.getApplicationContext()));
+
+                                    //Apply Palette  Effect
+                                    applyPalette(palette, collapsingToolbarLayout);
+                                }
+                            }
+
+                        }));
+            Uri posterUri = movie.getPosterUri();
+
+            //Load movie poster
+            Picasso.with(getActivity()).load(posterUri).fit().into(poster, new Callback() {
                 @Override
-                public void onClick(View v) {
-                    if (isFavorite) {
-                        Utilities.movieDisliked(movie.getId(), getActivity());
-                    } else {
-                        Utilities.movieLiked(movie, getActivity());
-                    }
-                    isFavorite = Utilities.checkFavorite(movie.getId(), getActivity());
-                    Utilities.updateHeartButton((FloatingActionButton) v, isFavorite);
+                public void onSuccess() {
+                    poster.getViewTreeObserver().addOnPreDrawListener(
+                        new ViewTreeObserver.OnPreDrawListener() {
+                            @Override
+                            public boolean onPreDraw() {
+                                if (isLollipop) {
+                                    poster.getViewTreeObserver().removeOnPreDrawListener(this);
+                                    getActivity().startPostponedEnterTransition();
+                                }
+                                return true;
+                            }
+                        });
                 }
+                @Override
+                public void onError() {}
             });
-            if (movie != null) {
-                Uri blurPosterUri = movie.getBlurPosterUri();
 
-                Picasso.with(getActivity()).load(blurPosterUri).
-                        fit().centerCrop().into(blur_poster,
-                        PicassoPalette.with(blurPosterUri.toString(), blur_poster)
-                                .intoCallBack(new BitmapPalette.CallBack() {
-                                    @Override
-                                    public void onPaletteLoaded(Palette palette) {
-                                        //Add Blur
-                                        Bitmap bitmap = ((BitmapDrawable) blur_poster.getDrawable()).getBitmap();
-                                        blur_poster.setImageBitmap(Utilities.blurRenderScript(bitmap, 18, getActivity()));
+            //Load movie title
+            String movieTitle = movie.getTitle();
 
-                                        //Apply Palette  Effect
-                                        applyPalette(palette, collapsingToolbarLayout);
-                                    }
-                                }));
-                Uri posterUri = movie.getPosterUri();
+            //TwoPane Mode so no collapsingToolbar effect
+            if (titleView != null && !showActionBar){
+                titleView.setText(movieTitle);
 
-                Picasso.with(getActivity()).load(posterUri).fit().into(poster, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        poster.getViewTreeObserver().addOnPreDrawListener(
-                                new ViewTreeObserver.OnPreDrawListener() {
-                                    @Override
-                                    public boolean onPreDraw() {
-                                        if (isLollipop) {
-                                            poster.getViewTreeObserver().removeOnPreDrawListener(this);
-                                            getActivity().startPostponedEnterTransition();
-                                        }
-                                        return true;
-
-                                    }
-                                });
+            //SinglePane Mode With CollapsingToolbarLayout
+            }else {
+                //Device is probably a Tablet
+                if (Utilities.getDeviceSW(getActivity())>=600){
+                    //Make the Text size smaller to accommodate long movie titles
+                    if (movieTitle.length()>33){
+                        collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.small_expanded);
+                        collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.small_collapsed);
                     }
 
-                    @Override
-                    public void onError() {
-
-                    }
-                });
-
-                String movieTitle = movie.getTitle();
-                if (titleView != null && !showActionBar){
-                    //TwoPane Mode
-                    titleView.setText(movieTitle);
                 }else {
-                    //SinglePane Mode With CollapsingToolbarLayout
-                    if (Utilities.getDeviceSW(getActivity())>=600){
-                        if (movieTitle.length()>33){
-                            collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.small_expanded);
-                            collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.small_collapsed);
-                        }
-                    }else {
-                        if (movieTitle.length()>15){
-                            collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.small_expanded);
-                            collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.small_collapsed);
-                        }
+                    if (movieTitle.length()>15){
+                        collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.small_expanded);
+                        collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.small_collapsed);
                     }
-
-                    collapsingToolbarLayout.setTitle(movieTitle);
                 }
-
-                releaseDateView.setText(Utilities.getFormattedDate(movie.getReleaseDate()));
-                userRatingView.setText(getString((R.string.vote_average), movie.getVoteAverage()));
-                plotView.setText(movie.getPlot());
+                collapsingToolbarLayout.setTitle(movieTitle);
             }
 
-            trailerAdapter = new TrailerAdapter(getActivity(), new ArrayList<Trailer>());
-            trailersListview.setAdapter(trailerAdapter);
+            releaseDateView.setText(Utilities.getFormattedDate(movie.getReleaseDate()));
+            userRatingView.setText(getString((R.string.vote_average), movie.getVoteAverage()));
+            plotView.setText(movie.getPlot());
+        }
 
-            trailersListview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Trailer selectedTrailer = (Trailer) trailerAdapter.getItem(position);
-                    Intent trailerIntent = new Intent(Intent.ACTION_VIEW, selectedTrailer.getTrailerUri());
-                    startActivity(trailerIntent);
-                }
-            });
-                reviewAdapter = new ReviewAdapter(getActivity(),new ArrayList<Review>());
-                reviewsListview.setAdapter(reviewAdapter);
+        trailerAdapter = new TrailerAdapter(mContext, new ArrayList<Trailer>());
+        trailersListview.setAdapter(trailerAdapter);
+
+        trailersListview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Trailer selectedTrailer = (Trailer) trailerAdapter.getItem(position);
+                Intent trailerIntent = new Intent(Intent.ACTION_VIEW, selectedTrailer.getTrailerUri());
+                startActivity(trailerIntent);
+            }
+        });
+        reviewAdapter = new ReviewAdapter(mContext,new ArrayList<Review>());
+        reviewsListview.setAdapter(reviewAdapter);
         return rootView;
     }
 
 
     private void applyPalette(Palette palette,CollapsingToolbarLayout collapsingToolbar){
         if (palette !=null && showActionBar) {
+
+            //Add color to Actionbar
             Palette.Swatch vibrantSwatch = palette.getVibrantSwatch();
             if (vibrantSwatch!=null){
                 int actionBarColorRGB = vibrantSwatch.getRgb();

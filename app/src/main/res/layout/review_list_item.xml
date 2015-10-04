@@ -10,14 +10,14 @@
         android:layout_height="wrap_content"
         android:textAppearance="@style/body_bold_text"
         android:textStyle="bold"
-        android:text="Rashwan : "
+        android:text="@string/placeholder_review_author"
         android:id="@+id/review_author"
         />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="@style/body_text"
-        android:text="Fabulous action movie. Lots of interesting characters. They don't make many movies like this. The whole movie from start to finish was entertaining I'm looking forward to seeing it again. I definitely recommend seeing it."
+        android:text="@string/placeholder_review_content"
         android:id="@+id/review_content"/>
 
 </LinearLayout>

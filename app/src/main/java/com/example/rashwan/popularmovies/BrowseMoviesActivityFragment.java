@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -50,27 +49,25 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
     private String modeFavorites;
     private OnItemSelectedListener listener;
     private static final int LOADER_ID = 1;
-    Context mContext;
+    private Context mContext;
     private Bundle args = new Bundle();
 
     @Override
     public android.content.Loader<List<Movie>> onCreateLoader(int id, Bundle args) {
-        Log.e("ONCREATELOADER","QE");
         return new FetchMoviesAsync(mContext,args);
     }
 
     @Override
     public void onLoadFinished(android.content.Loader<List<Movie>> loader, List<Movie> data) {
-        Log.e("ONLOADFINISHED","ASD");
         FetchMoviesAsync f = (FetchMoviesAsync) loader;
         if (data != null) {
             if (adapter.isEmpty()){
-                Log.e("ONLOADFINISHED", "ADAPTERISEMPTY");
+                //If we want the a specific page (basically the first page because the adapter is empty
                 if (jsonResponse.length()==0){
                     adapter.add(data);
                     gridView.setAdapter(adapter);
+                //if we want more that one page so we get it from the json response (i.e :screen orientation)
                 }else {
-                    Log.e("JSONRESONSE","HASITEMS");
                     try {
                         adapter.add(f.getMoviesfromJson(jsonResponse));
                         gridView.setAdapter(adapter);
@@ -78,35 +75,29 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
                         e.printStackTrace();
                     }
                 }
-
+            //Load more pages on scroll
             }else {
                 adapter.add(data);
                 adapter.notifyDataSetChanged();
             }
-
-            Log.e("OURRESONSE",String.valueOf(f.getJsonResponse().length()));
             jsonResponse = f.getJsonResponse();
         }
     }
 
     @Override
     public void onLoaderReset(android.content.Loader<List<Movie>> loader) {
-        Log.e("ONLOADERRESET", "RESET");
         adapter = new BrowseMoviesAdapter(getActivity(),new ArrayList<Movie>());
     }
 
     @Override
     public void favStateChanged() {
-        Log.e("FAVSTARCHANGED","HER");
         List<Movie> movies = Utilities.getFavorites(getActivity());
         if (sort_pref.equals(getString(R.string.sort_mode_favorites))){
             Utilities.setFavoritesAdapter(gridView,adapter,movies);
-
         }
     }
 
-
-
+    //Listener for selecting a movie from the gridView
     public interface OnItemSelectedListener {
         void onItemSelected(Movie movie,ImageView posterView);
     }
@@ -115,15 +106,15 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
     public BrowseMoviesActivityFragment() {
     }
 
+    //Save jsonResponse on configuration change
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(getString(R.string.bundle_json_response_key), jsonResponse.toString());
     }
 
-    @Override
+    //deprecated onAttach for devices pre Marshmallow 6.0 (Bug in Fragment class)
     public void onAttach(Activity activity) {
-        Log.e("ONATTACH", "Hold");
         super.onAttach(activity);
 
         if (activity instanceof OnItemSelectedListener){
@@ -137,7 +128,6 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
 
     @Override
     public void onAttach(Context context) {
-        Log.e("ONATTACH", "H");
         super.onAttach(context);
         if (context instanceof OnItemSelectedListener){
             listener = (OnItemSelectedListener) context;
@@ -147,17 +137,24 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
         }
         mContext = context;
     }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mContext =null;
+    }
+
     @Override
     public void onResume() {
         super.onResume();
-        android.content.Loader l = getLoaderManager().getLoader(LOADER_ID);
 
+        //Get the sorting preference
         sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
         noFavoritesView.setVisibility(View.GONE);
         args.putString(getString(R.string.bundle_json_response_key), jsonResponse.toString());
 
-
         if(adapter.isEmpty()) {
+            //If the device is connected to the internet fetch movies based on the user preference
             if (Utilities.checkConnectivity(getActivity())) {
 
                 if (sort_pref.equals(modePopular)) {
@@ -169,14 +166,15 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
                     args.putString(getString(R.string.bundle_url_key),topRatedMoviesURL);
                     args.putString(getString(R.string.bundle_scroll_page_key), String.valueOf(scrollPage));
                     getLoaderManager().initLoader(LOADER_ID, args, this);
+
                 } else {
                     List<Movie> moviesList = Utilities.getFavorites(getActivity());
                     Utilities.setFavoritesAdapter(gridView, adapter, moviesList);
                     if(adapter.isEmpty()){
-                        Log.e("ISEMPTY!!!!!!!1","Z");
                         noFavoritesView.setVisibility(View.VISIBLE);
                     }
                 }
+            //If the device is offline select "Favorite Movies" preference
             } else {
                 editor.putString(getString(R.string.sort_mode_key), modeFavorites);
                 editor.commit();
@@ -193,7 +191,7 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-
+        //set the context of the favorite listener
         Utilities.setFavListener(this);
 
         menu_sp = getActivity().getPreferences(Context.MODE_PRIVATE);
@@ -216,6 +214,8 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
                 .appendQueryParameter(getString(R.string.api_key_query_param), getString(R.string.movie_db_api_key))
                 .build();
         topRatedMoviesURL = topRatedURI.toString();
+
+        //Load Json response after configuration change
         if (savedInstanceState != null){
             String stringResponse = savedInstanceState.getString(getString(R.string.bundle_json_response_key));
             try {
@@ -241,46 +241,52 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        jsonResponse = new JSONArray();
-        scrollPage = 1;
         sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
+
         offlineView.setVisibility(View.GONE);
         noFavoritesView.setVisibility(View.GONE);
-        args.putString(getString(R.string.bundle_json_response_key), jsonResponse.toString());
-        switch (item.getItemId()){
 
-            case R.id.action_settings :
-                return true;
+        switch (item.getItemId()){
 
             case R.id.action_sort_popular :
                 item.setChecked(true);
-                adapter = new BrowseMoviesAdapter(getActivity(), new ArrayList<Movie>());
                 editor.putString(getString(R.string.sort_mode_key), modePopular);
 
-                if (Utilities.checkConnectivity(getActivity())){
-                    if ((sort_pref.equals(modeTopRated)) || (sort_pref.equals(modeFavorites))) {
-                        args.putString(getString(R.string.bundle_url_key),popularMoviesURL);
+                if (Utilities.checkConnectivity(mContext.getApplicationContext())){
+                    //If the device is connected to the internet & didn't choose the same preference
+                    if (!sort_pref.equals(modePopular)) {
+                        jsonResponse = new JSONArray();
+                        scrollPage = 1;
+                        adapter = new BrowseMoviesAdapter(mContext, new ArrayList<Movie>());
+                        args.putString(getString(R.string.bundle_json_response_key), jsonResponse.toString());
+                        args.putString(getString(R.string.bundle_url_key), popularMoviesURL);
                         args.putString(getString(R.string.bundle_scroll_page_key), String.valueOf(scrollPage));
                         getLoaderManager().restartLoader(LOADER_ID, args, this);
                     }
+                //If the device isn't connected to the internet show offline view
                 }else{
-                        gridView.setAdapter(adapter);
-                        offlineView.setVisibility(View.VISIBLE);
+                    adapter = new BrowseMoviesAdapter(mContext, new ArrayList<Movie>());
+                    gridView.setAdapter(adapter);
+                    offlineView.setVisibility(View.VISIBLE);
                 }
                 editor.commit();
                 return true;
 
             case R.id.action_sort_top_rated:
                 item.setChecked(true);
-                adapter = new BrowseMoviesAdapter(getActivity(), new ArrayList<Movie>());
                 editor.putString(getString(R.string.sort_mode_key), modeTopRated);
-                if (Utilities.checkConnectivity(getActivity())) {
-                    if ((sort_pref.equals(modePopular)) || (sort_pref.equals(modeFavorites))) {
+                if (Utilities.checkConnectivity(mContext.getApplicationContext())) {
+                    if (!sort_pref.equals(modeTopRated)) {
+                        jsonResponse = new JSONArray();
+                        scrollPage = 1;
+                        adapter = new BrowseMoviesAdapter(mContext, new ArrayList<Movie>());
+                        args.putString(getString(R.string.bundle_json_response_key), jsonResponse.toString());
                         args.putString(getString(R.string.bundle_url_key),topRatedMoviesURL);
                         args.putString(getString(R.string.bundle_scroll_page_key), String.valueOf(scrollPage));
                         getLoaderManager().restartLoader(LOADER_ID, args, this);
                     }
                 }else{
+                    adapter = new BrowseMoviesAdapter(mContext, new ArrayList<Movie>());
                     gridView.setAdapter(adapter);
                     offlineView.setVisibility(View.VISIBLE);
                 }
@@ -289,10 +295,10 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
 
             case R.id.action_favorite:
                 item.setChecked(true);
-                adapter = new BrowseMoviesAdapter(getActivity(), new ArrayList<Movie>());
+                adapter = new BrowseMoviesAdapter(mContext, new ArrayList<Movie>());
                 editor.putString(getString(R.string.sort_mode_key), modeFavorites);
                 editor.commit();
-                List<Movie> moviesList = Utilities.getFavorites(getActivity());
+                List<Movie> moviesList = Utilities.getFavorites(mContext);
                 Utilities.setFavoritesAdapter(gridView, adapter, moviesList);
                 if(adapter.isEmpty()){
                     noFavoritesView.setVisibility(View.VISIBLE);
@@ -314,7 +320,7 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
         offlineView  = (LinearLayout) rootView.findViewById(R.id.offline_view);
         noFavoritesView = (LinearLayout) rootView.findViewById(R.id.no_favorites_view);
 
-        adapter = new BrowseMoviesAdapter(getActivity(),new ArrayList<Movie>());
+        adapter = new BrowseMoviesAdapter(mContext,new ArrayList<Movie>());
 
         gridView.setOnItemClickListener(new OnItemClickListener() {
             @SuppressLint("NewApi")
@@ -323,8 +329,9 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
                 sort_pref = menu_sp.getString(getString(R.string.sort_mode_key), modePopular);
                 ImageView gridPoster = (ImageView) view.findViewById(R.id.movie_poster);
                 if (Utilities.isLollipopandAbove()) {
-                    gridPoster.setTransitionName("poster" + position);
+                    gridPoster.setTransitionName(getString(R.string.shared_element_transition_name) + position);
                 }
+
                 Movie movie = null;
                 if (!sort_pref.equals(modeFavorites)) {
                     try {
@@ -340,9 +347,12 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
                 } else {
                     movie = (Movie) adapter.getItem(position);
                 }
+                //Broadcast to main activity that a movie has been selected
                 listener.onItemSelected(movie, gridPoster);
             }
         });
+
+        //Load more Pages on Scroll
         final BrowseMoviesActivityFragment browseFragment = this;
         gridView.setOnScrollListener(new EndlessScrollListener(5, 1) {
             @Override
@@ -363,8 +373,6 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
                 }
             }
         });
-
         return rootView;
     }
 }
-

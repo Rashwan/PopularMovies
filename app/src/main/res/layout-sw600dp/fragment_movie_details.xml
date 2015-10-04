@@ -24,7 +24,9 @@
                 android:layout_height="match_parent"
                 android:id="@+id/blur_poster"
                 app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
-                app:layout_collapseMode="parallax" />
+                app:layout_collapseMode="parallax"
+                android:contentDescription="@string/content_description_blur_poster" />
+
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -34,7 +36,7 @@
                     android:layout_height="wrap_content"
                     android:minHeight="50dp"
                     android:layout_gravity="center_horizontal|bottom"
-                    android:background="@color/material_blue_grey_800"
+                    android:background="@color/movie_title_overly"
                     android:alpha="0.3" />
                 <TextView
                     android:layout_width="wrap_content"
@@ -89,7 +91,9 @@
                         android:layout_height="match_parent"
                         android:layout_gravity="center_horizontal"
                         android:id="@+id/poster"
-                        android:transitionName="poster"/>
+                        android:transitionName="poster"
+                        android:contentDescription="@string/content_description_movie_poster" />
+
                 </FrameLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -112,7 +116,6 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="MAY 1993"
                             android:id="@+id/release_date_formatted"
                             android:textAppearance="@style/body_bold_text"
                             android:layout_gravity="center"/>
@@ -134,7 +137,6 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="UserRating"
                             android:id="@+id/user_rating"
                             android:textAppearance="@style/body_bold_text"
                             android:textSize="16sp"
@@ -151,7 +153,6 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Plot"
                 android:id="@+id/plot"
                 android:textAppearance="@style/body_text"
                 android:paddingTop="10dp"
@@ -169,7 +170,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/title_text"
-                android:text="Trailers"
+                android:text="@string/trailers_title"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
                 android:textColor="@color/color_primary_dark"
@@ -192,7 +193,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/title_text"
-                android:text="Reviews"
+                android:text="@string/reviews_title"
                 android:paddingTop="5dp"
                 android:textColor="@color/color_primary_dark"
                 android:visibility="gone"

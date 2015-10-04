@@ -6,13 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import com.example.rashwan.popularmovies.pojos.Movie;
 import com.example.rashwan.popularmovies.R;
-import com.example.rashwan.popularmovies.utilities.Utilities;
+import com.example.rashwan.popularmovies.pojos.Movie;
 import com.github.florent37.picassopalette.PicassoPalette;
 import com.squareup.picasso.Picasso;
 
@@ -25,12 +21,10 @@ import java.util.List;
 public class BrowseMoviesAdapter extends BaseAdapter {
     private Context mContext;
     private List<Movie> mMovies = new ArrayList<>();
-    private boolean isConnected ;
 
     public BrowseMoviesAdapter(Context context, List<Movie> movies) {
         this.mContext = context;
         this.mMovies = movies;
-        isConnected = Utilities.checkConnectivity(mContext);
     }
 
     @Override
@@ -60,21 +54,18 @@ public class BrowseMoviesAdapter extends BaseAdapter {
             movieView = inflater.inflate(R.layout.movie_item, null);
 
         }
-
-        ImageView poster = (ImageView) movieView.findViewById(R.id.movie_poster);
-        TextView name = (TextView) movieView.findViewById(R.id.movie_name);
-        LinearLayout girdLayout = (LinearLayout) movieView.findViewById(R.id.gird_layout);
+        BrowseMoviesViewHolder browseMoviesViewHolder = new BrowseMoviesViewHolder(movieView);
 
         if (nameString.length()<=18){
 
-            name.setTextAppearance(mContext,R.style.grid_title_text_big);
+            browseMoviesViewHolder.name.setTextAppearance(mContext,R.style.grid_title_text_big);
         }
-        name.setText(nameString);
-        Picasso.with(mContext).load(posterUri).fit().into(poster
-                , PicassoPalette.with(posterUri.toString(), poster)
+        browseMoviesViewHolder.name.setText(nameString);
+        Picasso.with(mContext).load(posterUri).fit().into(browseMoviesViewHolder.poster
+                , PicassoPalette.with(posterUri.toString(), browseMoviesViewHolder.poster)
                 .use(PicassoPalette.Profile.VIBRANT)
-                .intoBackground(girdLayout)
-                .intoTextColor(name, PicassoPalette.Swatch.BODY_TEXT_COLOR));
+                .intoBackground(browseMoviesViewHolder.gridLayout)
+                .intoTextColor(browseMoviesViewHolder.name, PicassoPalette.Swatch.BODY_TEXT_COLOR));
         return movieView;
     }
 

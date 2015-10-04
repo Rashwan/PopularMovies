@@ -8,7 +8,6 @@
         <item name="android:textColorPrimary">@color/color_text_primary</item>
         <item name="android:textColorSecondary">@color/color_text_secondary</item>
         <item name="android:itemTextAppearance">@style/TextAppearance</item>
-
     </style>
 
     <style name="TextAppearance">
@@ -28,14 +27,17 @@
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textStyle">bold</item>
     </style>
+
     <style name="body_bold_text" parent="@android:style/TextAppearance.Medium">
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
     </style>
+
     <style name="body_text" parent="@android:style/TextAppearance.Medium">
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">normal</item>
     </style>
+
     <style name="grid_title_text_big" parent="@android:style/TextAppearance.Medium">
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">normal</item>
