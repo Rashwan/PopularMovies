@@ -3,7 +3,9 @@
     <string name="title_activity_movie_details">Movie Details</string>
     <string name="action_settings">Settings</string>
     <string name="shared_element_transition_name">transition</string>
-    <string name="movie_db_api_key">9c3654aee5aea28f21963eeebfd6f4a0</string>
+
+    <!-- Add Your Api Key Here-->
+    <string name="movie_db_api_key"></string>
 
     <!--Movie DB Urls related-->
     <string name="movies_base_url">http://api.themoviedb.org/3/movie/</string>
