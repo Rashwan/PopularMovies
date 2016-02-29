@@ -202,5 +202,7 @@
         app:layout_anchorGravity="bottom|right|end"
         app:layout_behavior="com.example.rashwan.popularmovies.utilities.ScrollAwareFABBehavior"
         android:id="@+id/fab_favorite"
+        app:elevation="6dp"
+        app:pressedTranslationZ="12dp"
         />
 </android.support.design.widget.CoordinatorLayout>

@@ -22,4 +22,5 @@ public class BrowseMoviesViewHolder {
         name = (TextView) view.findViewById(R.id.movie_name);
         gridLayout = (LinearLayout) view.findViewById(R.id.gird_layout);
     }
+
 }
