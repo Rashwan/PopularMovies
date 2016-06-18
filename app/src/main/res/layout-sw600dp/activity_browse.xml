@@ -16,7 +16,6 @@
     </android.support.v7.widget.Toolbar>
 
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/LinearLayout1"
         android:showDividers="middle"
         android:baselineAligned="false"

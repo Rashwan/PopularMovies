@@ -37,7 +37,6 @@ import com.example.rashwan.popularmovies.pojos.Movie;
 import com.example.rashwan.popularmovies.pojos.Review;
 import com.example.rashwan.popularmovies.pojos.Trailer;
 import com.example.rashwan.popularmovies.utilities.Utilities;
-import com.github.florent37.picassopalette.BitmapPalette;
 import com.github.florent37.picassopalette.PicassoPalette;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -268,7 +267,7 @@ public class MovieDetailsActivityFragment extends android.app.Fragment implement
 
             Picasso.with(getActivity()).load(blurPosterUri).fit().centerCrop()
                 .into(blur_poster, PicassoPalette.with(blurPosterUri.toString(), blur_poster)
-                        .intoCallBack(new BitmapPalette.CallBack() {
+                        .intoCallBack(new PicassoPalette.CallBack() {
                             @Override
                             public void onPaletteLoaded(Palette palette) {
                                 if (mContext!= null){

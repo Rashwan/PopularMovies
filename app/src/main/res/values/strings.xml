@@ -71,4 +71,10 @@
     <string name="reviews_title">Reviews</string>
     <string name="actionbar_share_title">Share</string>
 
+    <string-array name="sort_options">
+        <item>Favorites</item>
+        <item>Sort By : Popular</item>
+        <item>Sort By : Top Rated</item>
+    </string-array>
+
 </resources>

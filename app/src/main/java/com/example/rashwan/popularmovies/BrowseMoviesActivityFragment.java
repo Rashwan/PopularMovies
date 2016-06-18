@@ -373,6 +373,8 @@ public class BrowseMoviesActivityFragment extends android.app.Fragment implement
                 }
             }
         });
+
         return rootView;
     }
+
 }
